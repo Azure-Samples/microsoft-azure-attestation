@@ -76,7 +76,7 @@ To build and run the samples:
     1. ```cd validatequotes.core```
     1. ```./runall.sh```
     1. This builds and runs the validation application against the four different JSON files produced earlier.
-    1. The runall.sh script assumes you have access to the tradewinds.us.test.attest.azure.net attestation provider.  If you don't, edit the [runall.sh](./validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
+    1. The runall.sh script assumes you have access to the sharedcus.cus.attest.azure.net attestation provider.  If you don't, edit the [runall.sh](./validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
 
 The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
@@ -105,7 +105,7 @@ Here is an example of what the output of ```./runall.sh``` should look like:
 ```
 greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.sh 
 05/04/2020 12:32:28 : 
-05/04/2020 12:32:28 : Validating file '../genquotes/quotes/enclave.info.debug.json' against attestation provider 'tradewinds.us.test.attest.azure.net' with include details 'False'
+05/04/2020 12:32:28 : Validating file '../genquotes/quotes/enclave.info.debug.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
 05/04/2020 12:32:28 : 
 05/04/2020 12:32:31 : JWT JKU location validation:        True
 05/04/2020 12:32:32 : JWT signature validation:           True
@@ -119,7 +119,7 @@ greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.s
 05/04/2020 12:32:32 : Enclave Held Data check:            True
 05/04/2020 12:32:32 : 
 05/04/2020 12:32:33 : 
-05/04/2020 12:32:33 : Validating file '../genquotes/quotes/enclave.info.release.json' against attestation provider 'tradewinds.us.test.attest.azure.net' with include details 'False'
+05/04/2020 12:32:33 : Validating file '../genquotes/quotes/enclave.info.release.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
 05/04/2020 12:32:33 : 
 05/04/2020 12:32:36 : JWT JKU location validation:        True
 05/04/2020 12:32:37 : JWT signature validation:           True
@@ -133,7 +133,7 @@ greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.s
 05/04/2020 12:32:37 : Enclave Held Data check:            True
 05/04/2020 12:32:37 : 
 05/04/2020 12:32:38 : 
-05/04/2020 12:32:38 : Validating file '../genquotes/quotes/enclave.info.prodid.json' against attestation provider 'tradewinds.us.test.attest.azure.net' with include details 'False'
+05/04/2020 12:32:38 : Validating file '../genquotes/quotes/enclave.info.prodid.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
 05/04/2020 12:32:38 : 
 05/04/2020 12:32:40 : JWT JKU location validation:        True
 05/04/2020 12:32:42 : JWT signature validation:           True
@@ -147,7 +147,7 @@ greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.s
 05/04/2020 12:32:42 : Enclave Held Data check:            True
 05/04/2020 12:32:42 : 
 05/04/2020 12:32:43 : 
-05/04/2020 12:32:43 : Validating file '../genquotes/quotes/enclave.info.securityversion.json' against attestation provider 'tradewinds.us.test.attest.azure.net' with include details 'False'
+05/04/2020 12:32:43 : Validating file '../genquotes/quotes/enclave.info.securityversion.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
 05/04/2020 12:32:43 : 
 05/04/2020 12:32:45 : JWT JKU location validation:        True
 05/04/2020 12:32:47 : JWT signature validation:           True
