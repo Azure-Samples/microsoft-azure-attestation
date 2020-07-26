@@ -1,0 +1,30 @@
+{
+  "alg": "RS256",
+  "jku": "https://gnkuks001.uks.attest.azure.net/certs",
+  "kid": "KQFAHrk1xALKHBD4b4u7TCvCJ1Mw0MlYZe+rxdePOtg=",
+  "typ": "JWT"
+}
+
+{
+  "exp": 1590652390,
+  "iat": 1590623590,
+  "is-debuggable": false,
+  "iss": "https://gnkuks001.uks.attest.azure.net",
+  "maa-attestationcollateral": {
+    "maa-qeidcertshash": "1b2a7cd5966929aec1e061f47aba03ae422c11e9f8dce4212c2bb3609222f324",
+    "maa-qeidcrlhash": "cbb96537d69f90c8c41efb29a750fb09eb7693d9c4b5a22bcb4e6ab859f1ca25",
+    "maa-qeidhash": "a5d7246ce0cf2ac168724573cd2845d86d200eed4753676fd209ee9e2de7064e",
+    "maa-quotehash": "e2e7d0d775f53b47b9bc9c579565cd5bca0cd0c51ccb9a99c1f076e1730607df",
+    "maa-tcbinfocertshash": "1b2a7cd5966929aec1e061f47aba03ae422c11e9f8dce4212c2bb3609222f324",
+    "maa-tcbinfocrlhash": "cbb96537d69f90c8c41efb29a750fb09eb7693d9c4b5a22bcb4e6ab859f1ca25",
+    "maa-tcbinfohash": "0081d032aa6f85bfbfd95a26341f669c649e1db4ab9f09b7832834577c7d71b7"
+  },
+  "maa-ehd": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF5RmFKbFZ5OGdzRWFPNVFhcWwxYQptUUVPbUtSeC9BYmZ4dm9qODdUT0pIekxQU3ZoNUFxRVR5Y25UOWRnRlRaUW5QZktSby9PNVFRZ2xJRU0rMEo2ClAvajVwOCs4WmR3RGpIbXpkYUU1VHVHSkZIMERKR0ZicFU4bEFzNWhzT1NlbkZXZFJJZFR6c1BKVDFla0F2amEKTXBUbEFuZmpsdlpZWkk0UndrNy9EdFFIRDNQNUNWTDIvMWZvdkwvQ09kMXI1QmRHRUtFbU44R3BpQlZtYnhxeApVZmhLelFPeGliWEp6TmlXbVUvajRBeDhKTVJBS3d6QnVGdWh4cjU2Y1hObkRKdk5nNW03VW9hRU8vZmg5VmJBCklWWGZkRE81TWYvK2JCdHNMU1NUWW4wVTNVZlM3VDFpWlBtclAzSVBxUzNxd05XVUptbDdVWkpEOFhWNllGVDMKMlFJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "maa-policyHash": "200e2717392bfb187b89c7c498b8e5ebcd6ad136dc0cdb5b897fdb13e344ca40",
+  "nbf": 1590623590,
+  "product-id": 1,
+  "sgx-mrenclave": "90a328210154d861be7fc85a904e99fba713b05029321a470f62ea8495ec7d90",
+  "sgx-mrsigner": "6b1f95f512413b03759aaec2ec2b27cc2735468bb6113ccca163da92ca2b9b26",
+  "svn": 8888,
+  "tee": "sgx"
+}

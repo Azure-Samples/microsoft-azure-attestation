@@ -1,0 +1,12 @@
+## .gitignore for maa-samples
+
+# File extensions
+*.o
+*.bin
+*.signed
+
+# Specific file names
+genquote_host
+genquote_enclave
+
+# Directories
