@@ -1,7 +1,5 @@
 ---
 page_type: sample
-name: Microsoft Azure Attestation samples
-description :   Learn how to perform Intel® SGX Attestation using Open Enclave SDK and Microsoft Azure Attestation
 languages:
 - c
 - csharp
