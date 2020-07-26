@@ -1,9 +1,9 @@
-# Sample Code for Intel® SGX Attestation from Linux VM using Open Enclave SDK
+# Sample Code - Intel® SGX Attestation from Linux VM using Open Enclave SDK
 ## Overview
-The MAA SGX Attestation sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by the MAA service.  The "enclave held data" for the quote is populated with public key component of a 2048 bit RSA key that's held within the enclave.
+SGX Attestation sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by Microsoft Azure Attestation.  The "enclave held data" for the quote is populated with public key component of a 2048 bit RSA key that's held within the enclave.
 
 The components used in the sample code are outlined in the following diagram:
-![MAA SGX Attestation Overview Diagram](./docs/maa.sample.diagram.png)
+![SGX Attestation Overview Diagram](./docs/maa.sample.diagram.png)
 
 The flow is:
 1. ```genquote_host``` - This application is run first and performs the following:
@@ -13,16 +13,12 @@ The flow is:
     1. Persists the remote quote, enclave held data and parsed report fields to a JSON file on disk
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Open Enclave SDK.  It exposes one ecall to retrieve a remote quote and enclave held data.
 1. ```validatequotes.core``` - This application is built on .NET core and runs on any platform.  It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
-    1. Calls the MAA service for validation, passing it the remote quote and enclave held data found in the JSON file
-    1. Validates that the MAA JWT passes signature validation and is issued by the expected party
-    1. Validates that the MAA JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
+    1. Calls Azure Attestation for validation, passing it the remote quote and enclave held data found in the JSON file
+    1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
+    1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Produces a report in the console with the results
-1. ```validatequotes.net``` - This application is build on the .NET framework and only runs on Windows.  It performs all the validation performed by ```validatequotes.core``` and additionally validates the MAA service SGX quote embedded in its signing certificate using the Open Enclave SDK locally.  The additional steps are:
-    1. Checks for the presence of an SGX quote for the MAA service itself as an extension in the MAA X.509 signing certificate.
-    1. Verifies the SGX quote with the Open Enclve SDK's ```oe_verify_remote_report``` API.
-    1. Verifies that the hash of the public key that signed the JWT token matches the report data in the verified quote.
 
-The following diagram depicts the relationship between the different artifacts produced the MAA service for JWT token validation.
+The following diagram depicts the relationship between the different artifacts produced by Azure Attestation for JWT token validation.
 ![JWT Validation Overview Diagram](./docs/maa.jwt.validation.overview.png)
 
 ## Remote Quote Generation
@@ -40,28 +36,23 @@ Remote quote generation is performed by the following call to the ```oe_get_repo
         remote_report_buf_size);
 ```
 
-## Remote Quote Validation via MAA Attestation
+## Remote Quote Validation via Azure Attestation
 
-The MAA service is called to perform attestation by the following call in the [MaaService.cs](./validatequotes.net/MaaService.cs#L32) file:
+Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](./validatequotes.core/MaaService.cs#L32) file:
 
 ```
     // Send request
     var response = await theHttpClient.SendAsync(request);
 ```
 
-The verification that the MAA service JWT passes signature validation and is issued by the expected issuer is in the  [JwtHelperValidation.cs](./validatequotes.net/Helpers/JwtValidationHelper.cs#L21) file:
+The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtHelperValidation.cs](./validatequotes.core/Helpers/JwtValidationHelper.cs#L21) file:
 ```
     public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt)
 ```
 
-The verification that the MAA service JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./validatequotes.net/EnclaveInfo.cs#L31) file:
+The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./validatequotes.core/EnclaveInfo.cs#L31) file:
 ```
     public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
-```
-
-If the MAA service is running within an SGX enclave, the validation of the MAA service quote is performed in the [MaaQuoteValidator.cs](./validatequotes.net/MaaQuoteValidator.cs#L41) file:
-```
-    static public void ValidateMaaQuote(string x5c, bool includeDetails)
 ```
 
 
@@ -81,7 +72,7 @@ To build and run the samples:
     1. ```make build```
     1. ```make run```
     1. This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```../quotes``` directory.
-1. To build, run and validate the JSON files with the MAA service do the following:
+1. To build, run and validate the JSON files with Azure Attestation do the following:
     1. ```cd validatequotes.core```
     1. ```./runall.sh```
     1. This builds and runs the validation application against the four different JSON files produced earlier.
