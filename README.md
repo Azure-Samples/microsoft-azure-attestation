@@ -26,7 +26,7 @@ The following diagram depicts the relationship between the different artifacts p
 ## Remote Quote Generation
 *Note: The SGX enclave code in this sample is derived from the [remote_attestation sample code](https://github.com/openenclave/openenclave/tree/master/samples/remote_attestation) in Open Enclave SDK.  Many thanks to the author(s)!*
 
-Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](./genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
+Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](./sgx.attest.sample/genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
 ```
     result = oe_get_report(
         OE_REPORT_FLAGS_REMOTE_ATTESTATION,
@@ -40,7 +40,7 @@ Remote quote generation is performed by the following call to the ```oe_get_repo
 
 ## Remote Quote Validation via Azure Attestation
 
-Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](./validatequotes.core/MaaService.cs#L32) file:
+Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](./sgx.attest.sample/validatequotes.core/MaaService.cs#L32) file:
 
 ```
     // Send request
@@ -52,7 +52,7 @@ The verification that the Azure Attestation JWT passes signature validation and 
     public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt)
 ```
 
-The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./validatequotes.core/EnclaveInfo.cs#L31) file:
+The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./sgx.attest.sample/validatequotes.core/EnclaveInfo.cs#L31) file:
 ```
     public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
 ```
@@ -77,7 +77,7 @@ To build and run the samples:
     1. ```cd validatequotes.core```
     1. ```./runall.sh```
     1. This builds and runs the validation application against the four different JSON files produced earlier.
-    1. The runall.sh script assumes you have access to the sharedcus.cus.attest.azure.net attestation provider.  If you don't, edit the [runall.sh](./validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
+    1. The runall.sh script assumes you have access to the sharedcus.cus.attest.azure.net attestation provider.  If you don't, edit the [runall.sh](./sgx.attest.sample/validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
 
 The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
