@@ -7,6 +7,7 @@ products:
 - aspnet-core
 - linux
 - azure
+description: "Leran how to perform Intel® SGX Attestation using Microsoft Azure Attestation and Open Enclave SDK."
 ---
 
 # Sample code for Intel® SGX Attestation using Open Enclave SDK
