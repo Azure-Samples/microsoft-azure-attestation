@@ -163,10 +163,4 @@ greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.s
 05/04/2020 12:32:47 : 
 ```
 
-## Resources
 
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
