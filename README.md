@@ -1,4 +1,4 @@
-# Sample Code - Intel® SGX Attestation using Open Enclave SDK
+# Sample code for Intel® SGX Attestation using Open Enclave SDK
 
 Intel® SGX Attestation sample code demonstrates how to generate a quote from an SGX enclave using Open Enclave SDK and then get it validated by Microsoft Azure Attestation. The "enclave held data" for the quote is populated with public key component of a 2048 bit RSA key that's held within the enclave.
 
