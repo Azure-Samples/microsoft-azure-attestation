@@ -5,7 +5,7 @@ languages:
 - csharp
 products:
 - aspnet-core
-- linux
+- azure-linux-vm
 - azure
 description: "Leran how to perform Intel® SGX Attestation using Microsoft Azure Attestation and Open Enclave SDK."
 ---
