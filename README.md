@@ -64,12 +64,12 @@ var response = await theHttpClient.SendAsync(request);
 
 The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtValidationHelper.cs](./sgx.attest.sample/validatequotes.core/Helpers/JwtValidationHelper.cs#L15) file:
 ```
-    public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt, bool includeDetails)
+public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt, bool includeDetails)
 ```
 
 The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./sgx.attest.sample/validatequotes.core/EnclaveInfo.cs#L31) file:
 ```
-    public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
+public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
 ```
 
 ## Instructions to Build and Run Yourself
