@@ -43,14 +43,14 @@ The following diagram depicts the relationship between the different artifacts p
 
 Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](./sgx.attest.sample/genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
 ```
-    result = oe_get_report(
-        OE_REPORT_FLAGS_REMOTE_ATTESTATION,
-        sha256,
-        sizeof(sha256),
-        NULL, 
-        0,
-        &temp_buf,
-        remote_report_buf_size);
+result = oe_get_report(
+    OE_REPORT_FLAGS_REMOTE_ATTESTATION,
+    sha256,
+    sizeof(sha256),
+    NULL, 
+    0,
+    &temp_buf,
+    remote_report_buf_size);
 ```
 
 ## Remote Quote Validation via Azure Attestation
@@ -58,8 +58,8 @@ Remote quote generation is performed by the following call to the ```oe_get_repo
 Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](./sgx.attest.sample/validatequotes.core/MaaService.cs#L32) file:
 
 ```
-    // Send request
-    var response = await theHttpClient.SendAsync(request);
+// Send request
+var response = await theHttpClient.SendAsync(request);
 ```
 
 The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtValidationHelper.cs](./sgx.attest.sample/validatequotes.core/Helpers/JwtValidationHelper.cs#L15) file:
