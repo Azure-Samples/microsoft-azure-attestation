@@ -67,7 +67,7 @@ The verification that the MAA service JWT claims match the initial parsed report
 
 ##### 1. Prerequisites/System setup
 1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
-2. Install Intel SGX SGX Driver:  https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver
+2. Install Intel SGX SGX Driver, follow the installation instructions: https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver
 3. Install Intel SGX SDK: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
 4. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu) for Ubuntu 18.04 on this VM.
 
