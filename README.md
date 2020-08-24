@@ -27,11 +27,5 @@ The flow is:
     1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
     1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Produces a report in the console with the results
-1. ```validatequotes.net``` - This application is build on the .NET framework and only runs on Windows.  It performs all the validation performed by ```validatequotes.core``` and additionally validates the Azure Attestation SGX quote embedded in its signing certificate using the Open Enclave SDK locally.  The additional steps are:
-    1. Checks for the presence of an SGX quote for the Azure Attestation itself as an extension in the Azure Attestation X.509 signing certificate.
-    1. Verifies the SGX quote with the Open Enclve SDK's ```oe_verify_remote_report``` API.
-    1. Verifies that the hash of the public key that signed the JWT token matches the report data in the verified quote.
 
-The following diagram depicts the relationship between the different artifacts produced the Azure Attestation for JWT token validation.
-![JWT Validation Overview Diagram](./media/maa.jwt.validation.overview.png)
 
