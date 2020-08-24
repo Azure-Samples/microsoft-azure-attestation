@@ -33,7 +33,7 @@ The flow is:
     1. Verifies that the hash of the public key that signed the JWT token matches the report data in the verified quote.
 
 The following diagram depicts the relationship between the different artifacts produced the Azure Attestation for JWT token validation.
-![JWT Validation Overview Diagram](./media/maa.jwt.validation.overview.png)
+![JWT Validation Overview Diagram](../media/maa.jwt.validation.overview.png)
 
 
 ## Remote Quote Generation
