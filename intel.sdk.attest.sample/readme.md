@@ -1,19 +1,19 @@
 ## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel(R) SGX DCAP for Linux* OS
 
 ### References and Credits
-* The sample, including code, design and documentation, is derived from the [MAA SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow
+* The sample, including code, design and documentation, is derived from the [Intel® SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow
 * The SGX enclave and host code in this sample is derived from the [Intel(R) Software Guard Extensions Data Center Attestation Primitives (Intel(R) SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
 * Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
 * Intel(R) Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
 
 ### Overview
 
-The MAA SGX Attestation sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by the MAA service. The "enclave held data" for the quote for simplicity is populated with sample data represented as `uint8_t` array.
+The Azure Attestation SGX Attestation sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by the MAA service. The "enclave held data" for the quote for simplicity is populated with sample data represented as `uint8_t` array.
 
 Microsoft Azure Attestation attestation relies on Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP). Intel(R) SGX DCAP provides SGX attestation support targeted for data centers, cloud services providers and enterprises. This attestation model leverages Elliptic Curve Digital Signature algorithm (ECDSA) versus the current client based SGX attestation model which is EPID based (Enhanced Privacy Identification).
 
 The execution flow in the sample code are outlined in the following diagram:
-![MAA SGX Attestation Overview Diagram](./docs/sample.flow.png)
+![Microsoft Azure Attestation SGX Attestation Overview Diagram](./docs/sample.flow.png)
 
 The flow is:
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Intel® SGX SDK. It exposes one ECALL to retrieve a remote quote for enclave held data.
@@ -26,9 +26,9 @@ The flow is:
     1. Retrieves important attributes from the SGX report, such as Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Persists the remote quote, enclave held data and parsed report fields to a JSON file on disk
 1. ```validatequotes.core``` - This application is built on .NET core and runs on any platform. It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
-    1. Calls the MAA service for validation, passing it the remote quote and enclave held data found in the JSON file
-    1. Validates that the MAA JWT passes signature validation and is issued by the expected party
-    1. Validates that the MAA JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
+    1. Calls the Azure Attestation service for validation, passing it the remote quote and enclave held data found in the JSON file
+    1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
+    1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Produces a report in the console with the results
 
 ### Quote Generation
