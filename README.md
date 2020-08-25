@@ -23,5 +23,6 @@ The flow is:
 5. Output validation results
 
 Code sample to perform SGX attestation using [Open Enclave SDK](../intel.sdk.attest.sample)
+
 Code sample to perform SGX attestation using [Intel SDK](../sgx.attest.sample)
 
