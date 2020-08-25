@@ -60,7 +60,7 @@ Azure Attestation is called to perform attestation by the following call in the 
 var response = await theHttpClient.SendAsync(request);
 ```
 
-The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtValidationHelper.cs](./sgx.attest.sample/validatequotes.core/Helpers/JwtValidationHelper.cs#L15) file:
+The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtValidationHelper.cs](../sgx.attest.sample/validatequotes.core/Helpers/JwtValidationHelper.cs#L15) file:
 ```
 public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt, bool includeDetails)
 ```
