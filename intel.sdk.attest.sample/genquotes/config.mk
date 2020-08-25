@@ -60,7 +60,7 @@ else
 endif
 
 CXXFLAGS := $(CFLAGS) -std=c++11
-LDFLAGS := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(URTS_LIBRARY_NAME) -lpthread -l$(DCAP_LIBRARY_NAME) -l$(UAE_LIBRARY_NAME)
+LDFLAGS := $(SGX_COMMON_CFLAGS) -L/usr/lib/x86_64-linux-gnu -L$(SGX_LIBRARY_PATH)  -l$(URTS_LIBRARY_NAME) -lpthread -l$(DCAP_LIBRARY_NAME) -l$(UAE_LIBRARY_NAME)
 
 ifneq ($(SGX_MODE), HW)
 	LDFLAGS += -lsgx_uae_service_sim
