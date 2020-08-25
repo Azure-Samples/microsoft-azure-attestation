@@ -39,7 +39,7 @@ The following diagram depicts the relationship between the different artifacts p
 ## Remote Quote Generation
 *Note: The SGX enclave code in this sample is derived from the [remote_attestation sample code](https://github.com/openenclave/openenclave/tree/master/samples/remote_attestation) in Open Enclave SDK.  Many thanks to the author(s)!*
 
-Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](./sgx.attest.sample/genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
+Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](../sgx.attest.sample/genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
 ```
 result = oe_get_report(
     OE_REPORT_FLAGS_REMOTE_ATTESTATION,
