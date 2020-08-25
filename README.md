@@ -17,8 +17,8 @@ The components used in the sample code are outlined in the following diagram:
 
 The flow is:
 1. Build an SGX enclave
-2. Launch and SGX enclave and get SGX quote
-3. Persist SGX quote and Enclahe Held Data (EHD) to JSON file
+2. Launch an SGX enclave and get SGX quote
+3. Persist SGX quote and Enclave Held Data (EHD) to JSON file
 4. Call Azure Attestation for validation
 5. Output validation results
 
