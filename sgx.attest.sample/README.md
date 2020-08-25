@@ -53,7 +53,7 @@ result = oe_get_report(
 
 ## Remote Quote Validation via Azure Attestation
 
-Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](./sgx.attest.sample/validatequotes.core/MaaService.cs#L32) file:
+Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](../sgx.attest.sample/validatequotes.core/MaaService.cs#L32) file:
 
 ```
 // Send request
@@ -65,7 +65,7 @@ The verification that the Azure Attestation JWT passes signature validation and 
 public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt, bool includeDetails)
 ```
 
-The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](./sgx.attest.sample/validatequotes.core/EnclaveInfo.cs#L31) file:
+The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](../sgx.attest.sample/validatequotes.core/EnclaveInfo.cs#L31) file:
 ```
 public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
 ```
