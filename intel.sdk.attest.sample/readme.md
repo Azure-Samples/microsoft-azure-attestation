@@ -1,7 +1,7 @@
 ## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel(R) SGX SDK for Linux OS
 
 ### References and Credits
-* The sample, including code, design and documentation, is derived from the [MAA SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow
+* The sample, including code, design and documentation, is derived from the [MAA SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow (created by [gkostal](https://github.com/gkostal))
 * The SGX enclave and host code in this sample is derived from the [Intel(R) Software Guard Extensions Data Center Attestation Primitives (Intel(R) SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
 * Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
 * Intel(R) Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
@@ -67,7 +67,40 @@ The verification that the MAA service JWT claims match the initial parsed report
 ##### 1. Prerequisites/System setup
 1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
 2. Install Intel SGX Driver, follow the installation instructions: https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver
+
+Configure the Intel and Microsoft APT Repositories:
+
+```
+echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main" | sudo tee /etc/apt/sources.list.d/msprod.list
+wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+```
+
+Install Intel SGX DCAP Driver:
+```
+sudo apt -y update
+sudo apt install -y dkms
+wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.04/sgx_linux_x64_driver_1.21.bin -O sgx_linux_x64_driver.bin
+sudo chmod a+x sgx_linux_x64_driver.bin
+sudo ./sgx_linux_x64_driver.bin
+```
+
 3. Install Intel SGX SDK: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
+```
+wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.04/sgx_linux_x64_sdk_2.8.100.3.bin -O sgx_linux_x64_sdk.bin
+sudo chmod a+x sgx_linux_x64_sdk.bin
+sudo ./sgx_linux_x64_sdk.bin
+# Specify directory to intall Intel SDK. For example, /opt/intel
+# if the SDK is installed into /opt/intel, run the following command
+echo "source /opt/intel/sgxsdk/environment" >> ~/.bashrc && source ~/.bashrc
+```
+
+Install other dependencies:
+```
+sudo apt install -y libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
+```
+
 4. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu) for Ubuntu 18.04 on this VM.
 
 ##### 2. Build and Run
