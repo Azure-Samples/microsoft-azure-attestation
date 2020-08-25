@@ -67,10 +67,9 @@ The verification that the MAA service JWT claims match the initial parsed report
 
 ##### 1. Prerequisites/System setup
 1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
-2. Install Intel SGX Driver, follow the installation instructions: https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver
+2. Install Intel SGX Driver and SGX SDK.
 
 Configure the Intel and Microsoft APT Repositories:
-
 ```
 echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
 wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
@@ -86,8 +85,9 @@ wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.
 sudo chmod a+x sgx_linux_x64_driver.bin
 sudo ./sgx_linux_x64_driver.bin
 ```
+For more information see: https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver .
 
-3. Install Intel SGX SDK: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
+Install Intel SGX SDK: 
 ```
 wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.04/sgx_linux_x64_sdk_2.8.100.3.bin -O sgx_linux_x64_sdk.bin
 sudo chmod a+x sgx_linux_x64_sdk.bin
@@ -96,13 +96,14 @@ sudo ./sgx_linux_x64_sdk.bin
 # if the SDK is installed into /opt/intel, run the following command
 echo "source /opt/intel/sgxsdk/environment" >> ~/.bashrc && source ~/.bashrc
 ```
+For more information see: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
 
-Install other dependencies:
+Install SGX libraries:
 ```
 sudo apt install -y libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
 ```
 
-4. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu) for Ubuntu 18.04 on this VM.
+3. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu) for Ubuntu 18.04 on this VM.
 
 ##### 2. Build and Run
 1. ```git clone ``` this repo to the VM
