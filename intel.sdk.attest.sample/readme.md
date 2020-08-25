@@ -1,10 +1,10 @@
-## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel(R) SGX SDK for Linux OS
+## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel® SGX SDK for Linux OS
 
 ### References and Credits
 * The sample, including code, design and documentation, is derived from the [MAA SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow (created by [gkostal](https://github.com/gkostal))
-* The SGX enclave and host code in this sample is derived from the [Intel(R) Software Guard Extensions Data Center Attestation Primitives (Intel(R) SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
-* Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
-* Intel(R) Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
+* The SGX enclave and host code in this sample is derived from the [Intel® Software Guard Extensions Data Center Attestation Primitives (Intel® SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
+* Intel® Software Guard Extensions (Intel® SGX) Data Center Attestation Primitives (Intel® SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
+* Intel® Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
 
 ### Overview
 
@@ -13,6 +13,7 @@ The Azure Attestation SGX sample code demonstrates how to generate a quote in an
 The execution flow in the sample code are outlined in the following diagram:
 
 ![Microsoft Azure Attestation SGX Attestation Overview Diagram](./docs/sample.flow.png)
+=======
 
 The flow is:
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Intel® SGX SDK. It exposes one ECALL to retrieve a remote quote for enclave held data.
