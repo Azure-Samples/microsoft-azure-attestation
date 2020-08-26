@@ -1,19 +1,19 @@
-## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel(R) SGX DCAP for Linux* OS
+## Sample code for Intel® SGX Attestation using Microsoft Azure Attestation and Intel® SGX SDK for Linux OS
 
 ### References and Credits
-* The sample, including code, design and documentation, is derived from the [Intel® SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow
-* The SGX enclave and host code in this sample is derived from the [Intel(R) Software Guard Extensions Data Center Attestation Primitives (Intel(R) SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
-* Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
-* Intel(R) Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
+* The sample, including code, design and documentation, is derived from the [MAA SGX Attestation Sample Code Using Open Enclave SDK](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample) and follows its execution flow (created by [gkostal](https://github.com/gkostal))
+* The SGX enclave and host code in this sample is derived from the [Intel® Software Guard Extensions Data Center Attestation Primitives (Intel® SGX DCAP) Quote Generation SampleCode](https://github.com/intel/SGXDataCenterAttestationPrimitives/tree/master/SampleCode/QuoteGenerationSample)
+* Intel® Software Guard Extensions (Intel® SGX) Data Center Attestation Primitives (Intel® SGX DCAP): https://github.com/intel/SGXDataCenterAttestationPrimitives
+* Intel® Software Guard Extensions for Linux* OS: https://github.com/intel/linux-sgx
 
 ### Overview
 
-The Azure Attestation SGX Attestation sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by the MAA service. The "enclave held data" for the quote for simplicity is populated with sample data represented as `uint8_t` array.
-
-Microsoft Azure Attestation attestation relies on Intel(R) Software Guard Extensions (Intel(R) SGX) Data Center Attestation Primitives (Intel(R) SGX DCAP). Intel(R) SGX DCAP provides SGX attestation support targeted for data centers, cloud services providers and enterprises. This attestation model leverages Elliptic Curve Digital Signature algorithm (ECDSA) versus the current client based SGX attestation model which is EPID based (Enhanced Privacy Identification).
+The Azure Attestation SGX sample code demonstrates how to generate a quote in an SGX enclave and then get it validated by the Microsoft Azure Attestation (MAA) service. The "enclave held data" for the quote for simplicity is populated with sample data represented as `uint8_t` array.
 
 The execution flow in the sample code are outlined in the following diagram:
+
 ![Microsoft Azure Attestation SGX Attestation Overview Diagram](./docs/sample.flow.png)
+=======
 
 The flow is:
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Intel® SGX SDK. It exposes one ECALL to retrieve a remote quote for enclave held data.
@@ -65,12 +65,48 @@ The verification that the MAA service JWT claims match the initial parsed report
 
 ### How to Build and Run
 
+##### 1. Prerequisites/System setup
 1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
-1. Install the Intel SGX SDK - WRITE ME
-1. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804) on this VM.
+2. Install Intel SGX Driver and SGX SDK.
 
-To build and run the samples:
-1. ```git clone``` this repo to the VM
+Configure the Intel and Microsoft APT Repositories:
+```
+echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main" | sudo tee /etc/apt/sources.list.d/msprod.list
+wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+```
+
+Install Intel SGX DCAP Driver:
+```
+sudo apt -y update
+sudo apt install -y dkms
+wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.04/sgx_linux_x64_driver_1.21.bin -O sgx_linux_x64_driver.bin
+sudo chmod a+x sgx_linux_x64_driver.bin
+sudo ./sgx_linux_x64_driver.bin
+```
+For more information see: https://github.com/intel/linux-sgx#build-and-install-the-intelr-sgx-driver .
+
+Install Intel SGX SDK: 
+```
+wget https://download.01.org/intel-sgx/sgx-dcap/1.4/linux/distro/ubuntuServer18.04/sgx_linux_x64_sdk_2.8.100.3.bin -O sgx_linux_x64_sdk.bin
+sudo chmod a+x sgx_linux_x64_sdk.bin
+sudo ./sgx_linux_x64_sdk.bin
+# Specify directory to intall Intel SDK. For example, /opt/intel
+# if the SDK is installed into /opt/intel, run the following command
+echo "source /opt/intel/sgxsdk/environment" >> ~/.bashrc && source ~/.bashrc
+```
+For more information see: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
+
+Install SGX libraries:
+```
+sudo apt install -y libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
+```
+
+3. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu) for Ubuntu 18.04 on this VM.
+
+##### 2. Build and Run
+1. ```git clone ``` this repo to the VM
 1. ```cd``` to the subdirectory containing this sample code
 1. To build, run and generate the JSON files do the following:
     1. ```cd genquotes```
@@ -82,7 +118,7 @@ To build and run the samples:
     1. This builds and runs the validation application against the four different JSON files produced earlier.
     1. The runall.sh script assumes you have access to the `sharedcus.cus.attest.azure.net` attestation provider.  If you don't, edit the [runall.sh](./validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
 
-The four different JSON files are:
+##### The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
 * *enclave.info.release.json* - debugging disabled
 * *enclave.info.securityversion.json* - security version set to 8888
