@@ -7,9 +7,35 @@
 #include <openenclave/bits/result.h>
 
 /**** User includes. ****/
-/* There were no user includes. */
+#include "openenclave/bits/types.h"
+#include "openenclave/bits/sgx/sgxtypes.h"
 
 /**** User defined types in EDL. ****/
-/* There were no user defined types. */
+#ifndef EDGER8R_STRUCT_OE_HOST_WORKER_CONTEXT_T
+#define EDGER8R_STRUCT_OE_HOST_WORKER_CONTEXT_T
+typedef struct oe_host_worker_context_t
+{
+    void* call_arg;
+    oe_enclave_t* enc;
+    bool is_stopping;
+    int32_t event;
+    uint64_t spin_count;
+    uint64_t total_spin_count;
+} oe_host_worker_context_t;
+#endif
+
+#ifndef EDGER8R_STRUCT_OE_ENCLAVE_WORKER_CONTEXT_T
+#define EDGER8R_STRUCT_OE_ENCLAVE_WORKER_CONTEXT_T
+typedef struct oe_enclave_worker_context_t
+{
+    void* call_arg;
+    oe_enclave_t* enc;
+    bool is_stopping;
+    int32_t event;
+    uint64_t spin_count;
+    uint64_t spin_count_threshold;
+    uint64_t total_spin_count;
+} oe_enclave_worker_context_t;
+#endif
 
 #endif // EDGER8R_REMOTEATTESTATION_ARGS_H

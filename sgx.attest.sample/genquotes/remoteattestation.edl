@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 enclave {
+    // Include system EDL files here
+    from "platform.edl" import *;
+
     trusted {
         // Return the public key of this enclave along with the enclave's remote report.
         // Another enclave can use the remote report to attest the enclave and verify

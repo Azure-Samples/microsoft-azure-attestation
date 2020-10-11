@@ -7,6 +7,72 @@
 
 OE_EXTERNC_BEGIN
 
+/**** Trusted function IDs ****/
+enum
+{
+    remoteattestation_fcn_id_get_remote_report_with_pubkey = 0,
+    remoteattestation_fcn_id_oe_get_sgx_report_ecall = 1,
+    remoteattestation_fcn_id_oe_get_report_v2_ecall = 2,
+    remoteattestation_fcn_id_oe_verify_local_report_ecall = 3,
+    remoteattestation_fcn_id_oe_sgx_init_context_switchless_ecall = 4,
+    remoteattestation_fcn_id_oe_sgx_switchless_enclave_worker_thread_ecall = 5,
+    remoteattestation_fcn_id_trusted_call_id_max = OE_ENUM_MAX
+};
+
+/**** ECALL marshalling structs. ****/
+typedef struct _get_remote_report_with_pubkey_args_t
+{
+    oe_result_t _result;
+    int _retval;
+    uint8_t** pem_key;
+    size_t* key_size;
+    uint8_t** remote_report;
+    size_t* remote_report_size;
+} get_remote_report_with_pubkey_args_t;
+
+typedef struct _oe_get_sgx_report_ecall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    void* opt_params;
+    size_t opt_params_size;
+    sgx_report_t* report;
+} oe_get_sgx_report_ecall_args_t;
+
+typedef struct _oe_get_report_v2_ecall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    uint32_t flags;
+    void* opt_params;
+    size_t opt_params_size;
+    uint8_t** report_buffer;
+    size_t* report_buffer_size;
+} oe_get_report_v2_ecall_args_t;
+
+typedef struct _oe_verify_local_report_ecall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    uint8_t* report;
+    size_t report_size;
+    oe_report_t* parsed_report;
+} oe_verify_local_report_ecall_args_t;
+
+typedef struct _oe_sgx_init_context_switchless_ecall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    oe_host_worker_context_t* host_worker_contexts;
+    uint64_t num_host_workers;
+} oe_sgx_init_context_switchless_ecall_args_t;
+
+typedef struct _oe_sgx_switchless_enclave_worker_thread_ecall_args_t
+{
+    oe_result_t _result;
+    oe_enclave_worker_context_t* context;
+} oe_sgx_switchless_enclave_worker_thread_ecall_args_t;
+
 /**** ECALL function wrappers. ****/
 
 oe_result_t get_remote_report_with_pubkey(
@@ -123,13 +189,1177 @@ done:
     return _result;
 }
 
+oe_result_t oe_get_sgx_report_ecall(
+    oe_enclave_t* enclave,
+    oe_result_t* _retval,
+    const void* opt_params,
+    size_t opt_params_size,
+    sgx_report_t* report)
+{
+    oe_result_t _result = OE_FAILURE;
+
+    /* Marshalling struct. */
+    oe_get_sgx_report_ecall_args_t _args, *_pargs_in = NULL, *_pargs_out = NULL;
+
+    /* Marshalling buffer and sizes. */
+    size_t _input_buffer_size = 0;
+    size_t _output_buffer_size = 0;
+    size_t _total_buffer_size = 0;
+    uint8_t* _buffer = NULL;
+    uint8_t* _input_buffer = NULL;
+    uint8_t* _output_buffer = NULL;
+    size_t _input_buffer_offset = 0;
+    size_t _output_buffer_offset = 0;
+    size_t _output_bytes_written = 0;
+
+    /* Deep copy buffer. */
+    /* No pointers to save for deep copy. */
+
+    /* Fill marshalling struct. */
+    memset(&_args, 0, sizeof(_args));
+    _args.opt_params = (void*)opt_params;
+    _args.opt_params_size = opt_params_size;
+    _args.report = (sgx_report_t*)report;
+
+    /* Compute input buffer size. Include in and in-out parameters. */
+    OE_ADD_SIZE(_input_buffer_size, sizeof(oe_get_sgx_report_ecall_args_t));
+    if (opt_params)
+        OE_ADD_SIZE(_input_buffer_size, _args.opt_params_size);
+    
+    /* Compute output buffer size. Include out and in-out parameters. */
+    OE_ADD_SIZE(_output_buffer_size, sizeof(oe_get_sgx_report_ecall_args_t));
+    if (report)
+        OE_ADD_SIZE(_output_buffer_size, sizeof(sgx_report_t));
+    
+    /* Allocate marshalling buffer. */
+    _total_buffer_size = _input_buffer_size;
+    OE_ADD_SIZE(_total_buffer_size, _output_buffer_size);
+    _buffer = (uint8_t*)oe_malloc(_total_buffer_size);
+    _input_buffer = _buffer;
+    _output_buffer = _buffer + _input_buffer_size;
+    if (_buffer == NULL)
+    {
+        _result = OE_OUT_OF_MEMORY;
+        goto done;
+    }
+    
+    /* Serialize buffer inputs (in and in-out parameters). */
+    _pargs_in = (oe_get_sgx_report_ecall_args_t*)_input_buffer;
+    OE_ADD_SIZE(_input_buffer_offset, sizeof(*_pargs_in));
+    if (opt_params)
+        OE_WRITE_IN_PARAM(opt_params, _args.opt_params_size, void*);
+    
+    /* Copy args structure (now filled) to input buffer. */
+    memcpy(_pargs_in, &_args, sizeof(*_pargs_in));
+
+    /* Call enclave function. */
+    if ((_result = oe_call_enclave_function(
+             enclave,
+             remoteattestation_fcn_id_oe_get_sgx_report_ecall,
+             _input_buffer,
+             _input_buffer_size,
+             _output_buffer,
+             _output_buffer_size,
+             &_output_bytes_written)) != OE_OK)
+        goto done;
+
+    /* Setup output arg struct pointer. */
+    _pargs_out = (oe_get_sgx_report_ecall_args_t*)_output_buffer;
+    OE_ADD_SIZE(_output_buffer_offset, sizeof(*_pargs_out));
+    
+    /* Check if the call succeeded. */
+    if ((_result = _pargs_out->_result) != OE_OK)
+        goto done;
+    
+    /* Currently exactly _output_buffer_size bytes must be written. */
+    if (_output_bytes_written != _output_buffer_size)
+    {
+        _result = OE_FAILURE;
+        goto done;
+    }
+    
+    /* Unmarshal return value and out, in-out parameters. */
+    *_retval = _pargs_out->_retval;
+    /* No pointers to restore for deep copy. */
+    OE_READ_OUT_PARAM(report, (size_t)(sizeof(sgx_report_t)));
+
+    _result = OE_OK;
+
+done:
+    if (_buffer)
+        free(_buffer);
+
+    /* No `_ptrs` to free for deep copy. */
+
+    return _result;
+}
+
+oe_result_t oe_get_report_v2_ecall(
+    oe_enclave_t* enclave,
+    oe_result_t* _retval,
+    uint32_t flags,
+    const void* opt_params,
+    size_t opt_params_size,
+    uint8_t** report_buffer,
+    size_t* report_buffer_size)
+{
+    oe_result_t _result = OE_FAILURE;
+
+    /* Marshalling struct. */
+    oe_get_report_v2_ecall_args_t _args, *_pargs_in = NULL, *_pargs_out = NULL;
+
+    /* Marshalling buffer and sizes. */
+    size_t _input_buffer_size = 0;
+    size_t _output_buffer_size = 0;
+    size_t _total_buffer_size = 0;
+    uint8_t* _buffer = NULL;
+    uint8_t* _input_buffer = NULL;
+    uint8_t* _output_buffer = NULL;
+    size_t _input_buffer_offset = 0;
+    size_t _output_buffer_offset = 0;
+    size_t _output_bytes_written = 0;
+
+    /* Deep copy buffer. */
+    /* No pointers to save for deep copy. */
+
+    /* Fill marshalling struct. */
+    memset(&_args, 0, sizeof(_args));
+    _args.flags = flags;
+    _args.opt_params = (void*)opt_params;
+    _args.opt_params_size = opt_params_size;
+    _args.report_buffer = (uint8_t**)report_buffer;
+    _args.report_buffer_size = (size_t*)report_buffer_size;
+
+    /* Compute input buffer size. Include in and in-out parameters. */
+    OE_ADD_SIZE(_input_buffer_size, sizeof(oe_get_report_v2_ecall_args_t));
+    if (opt_params)
+        OE_ADD_SIZE(_input_buffer_size, _args.opt_params_size);
+    
+    /* Compute output buffer size. Include out and in-out parameters. */
+    OE_ADD_SIZE(_output_buffer_size, sizeof(oe_get_report_v2_ecall_args_t));
+    if (report_buffer)
+        OE_ADD_SIZE(_output_buffer_size, sizeof(uint8_t*));
+    if (report_buffer_size)
+        OE_ADD_SIZE(_output_buffer_size, sizeof(size_t));
+    
+    /* Allocate marshalling buffer. */
+    _total_buffer_size = _input_buffer_size;
+    OE_ADD_SIZE(_total_buffer_size, _output_buffer_size);
+    _buffer = (uint8_t*)oe_malloc(_total_buffer_size);
+    _input_buffer = _buffer;
+    _output_buffer = _buffer + _input_buffer_size;
+    if (_buffer == NULL)
+    {
+        _result = OE_OUT_OF_MEMORY;
+        goto done;
+    }
+    
+    /* Serialize buffer inputs (in and in-out parameters). */
+    _pargs_in = (oe_get_report_v2_ecall_args_t*)_input_buffer;
+    OE_ADD_SIZE(_input_buffer_offset, sizeof(*_pargs_in));
+    if (opt_params)
+        OE_WRITE_IN_PARAM(opt_params, _args.opt_params_size, void*);
+    
+    /* Copy args structure (now filled) to input buffer. */
+    memcpy(_pargs_in, &_args, sizeof(*_pargs_in));
+
+    /* Call enclave function. */
+    if ((_result = oe_call_enclave_function(
+             enclave,
+             remoteattestation_fcn_id_oe_get_report_v2_ecall,
+             _input_buffer,
+             _input_buffer_size,
+             _output_buffer,
+             _output_buffer_size,
+             &_output_bytes_written)) != OE_OK)
+        goto done;
+
+    /* Setup output arg struct pointer. */
+    _pargs_out = (oe_get_report_v2_ecall_args_t*)_output_buffer;
+    OE_ADD_SIZE(_output_buffer_offset, sizeof(*_pargs_out));
+    
+    /* Check if the call succeeded. */
+    if ((_result = _pargs_out->_result) != OE_OK)
+        goto done;
+    
+    /* Currently exactly _output_buffer_size bytes must be written. */
+    if (_output_bytes_written != _output_buffer_size)
+    {
+        _result = OE_FAILURE;
+        goto done;
+    }
+    
+    /* Unmarshal return value and out, in-out parameters. */
+    *_retval = _pargs_out->_retval;
+    /* No pointers to restore for deep copy. */
+    OE_READ_OUT_PARAM(report_buffer, (size_t)(sizeof(uint8_t*)));
+    OE_READ_OUT_PARAM(report_buffer_size, (size_t)(sizeof(size_t)));
+
+    _result = OE_OK;
+
+done:
+    if (_buffer)
+        free(_buffer);
+
+    /* No `_ptrs` to free for deep copy. */
+
+    return _result;
+}
+
+oe_result_t oe_verify_local_report_ecall(
+    oe_enclave_t* enclave,
+    oe_result_t* _retval,
+    const uint8_t* report,
+    size_t report_size,
+    oe_report_t* parsed_report)
+{
+    oe_result_t _result = OE_FAILURE;
+
+    /* Marshalling struct. */
+    oe_verify_local_report_ecall_args_t _args, *_pargs_in = NULL, *_pargs_out = NULL;
+
+    /* Marshalling buffer and sizes. */
+    size_t _input_buffer_size = 0;
+    size_t _output_buffer_size = 0;
+    size_t _total_buffer_size = 0;
+    uint8_t* _buffer = NULL;
+    uint8_t* _input_buffer = NULL;
+    uint8_t* _output_buffer = NULL;
+    size_t _input_buffer_offset = 0;
+    size_t _output_buffer_offset = 0;
+    size_t _output_bytes_written = 0;
+
+    /* Deep copy buffer. */
+    /* No pointers to save for deep copy. */
+
+    /* Fill marshalling struct. */
+    memset(&_args, 0, sizeof(_args));
+    _args.report = (uint8_t*)report;
+    _args.report_size = report_size;
+    _args.parsed_report = (oe_report_t*)parsed_report;
+
+    /* Compute input buffer size. Include in and in-out parameters. */
+    OE_ADD_SIZE(_input_buffer_size, sizeof(oe_verify_local_report_ecall_args_t));
+    if (report)
+        OE_ADD_SIZE(_input_buffer_size, _args.report_size);
+    
+    /* Compute output buffer size. Include out and in-out parameters. */
+    OE_ADD_SIZE(_output_buffer_size, sizeof(oe_verify_local_report_ecall_args_t));
+    if (parsed_report)
+        OE_ADD_SIZE(_output_buffer_size, sizeof(oe_report_t));
+    
+    /* Allocate marshalling buffer. */
+    _total_buffer_size = _input_buffer_size;
+    OE_ADD_SIZE(_total_buffer_size, _output_buffer_size);
+    _buffer = (uint8_t*)oe_malloc(_total_buffer_size);
+    _input_buffer = _buffer;
+    _output_buffer = _buffer + _input_buffer_size;
+    if (_buffer == NULL)
+    {
+        _result = OE_OUT_OF_MEMORY;
+        goto done;
+    }
+    
+    /* Serialize buffer inputs (in and in-out parameters). */
+    _pargs_in = (oe_verify_local_report_ecall_args_t*)_input_buffer;
+    OE_ADD_SIZE(_input_buffer_offset, sizeof(*_pargs_in));
+    if (report)
+        OE_WRITE_IN_PARAM(report, _args.report_size, uint8_t*);
+    
+    /* Copy args structure (now filled) to input buffer. */
+    memcpy(_pargs_in, &_args, sizeof(*_pargs_in));
+
+    /* Call enclave function. */
+    if ((_result = oe_call_enclave_function(
+             enclave,
+             remoteattestation_fcn_id_oe_verify_local_report_ecall,
+             _input_buffer,
+             _input_buffer_size,
+             _output_buffer,
+             _output_buffer_size,
+             &_output_bytes_written)) != OE_OK)
+        goto done;
+
+    /* Setup output arg struct pointer. */
+    _pargs_out = (oe_verify_local_report_ecall_args_t*)_output_buffer;
+    OE_ADD_SIZE(_output_buffer_offset, sizeof(*_pargs_out));
+    
+    /* Check if the call succeeded. */
+    if ((_result = _pargs_out->_result) != OE_OK)
+        goto done;
+    
+    /* Currently exactly _output_buffer_size bytes must be written. */
+    if (_output_bytes_written != _output_buffer_size)
+    {
+        _result = OE_FAILURE;
+        goto done;
+    }
+    
+    /* Unmarshal return value and out, in-out parameters. */
+    *_retval = _pargs_out->_retval;
+    /* No pointers to restore for deep copy. */
+    OE_READ_OUT_PARAM(parsed_report, (size_t)(sizeof(oe_report_t)));
+
+    _result = OE_OK;
+
+done:
+    if (_buffer)
+        free(_buffer);
+
+    /* No `_ptrs` to free for deep copy. */
+
+    return _result;
+}
+
+oe_result_t oe_sgx_init_context_switchless_ecall(
+    oe_enclave_t* enclave,
+    oe_result_t* _retval,
+    oe_host_worker_context_t* host_worker_contexts,
+    uint64_t num_host_workers)
+{
+    oe_result_t _result = OE_FAILURE;
+
+    /* Marshalling struct. */
+    oe_sgx_init_context_switchless_ecall_args_t _args, *_pargs_in = NULL, *_pargs_out = NULL;
+
+    /* Marshalling buffer and sizes. */
+    size_t _input_buffer_size = 0;
+    size_t _output_buffer_size = 0;
+    size_t _total_buffer_size = 0;
+    uint8_t* _buffer = NULL;
+    uint8_t* _input_buffer = NULL;
+    uint8_t* _output_buffer = NULL;
+    size_t _input_buffer_offset = 0;
+    size_t _output_buffer_offset = 0;
+    size_t _output_bytes_written = 0;
+
+    /* Deep copy buffer. */
+    /* No pointers to save for deep copy. */
+
+    /* Fill marshalling struct. */
+    memset(&_args, 0, sizeof(_args));
+    _args.host_worker_contexts = (oe_host_worker_context_t*)host_worker_contexts;
+    _args.num_host_workers = num_host_workers;
+
+    /* Compute input buffer size. Include in and in-out parameters. */
+    OE_ADD_SIZE(_input_buffer_size, sizeof(oe_sgx_init_context_switchless_ecall_args_t));
+    /* There were no corresponding parameters. */
+    
+    /* Compute output buffer size. Include out and in-out parameters. */
+    OE_ADD_SIZE(_output_buffer_size, sizeof(oe_sgx_init_context_switchless_ecall_args_t));
+    /* There were no corresponding parameters. */
+    
+    /* Allocate marshalling buffer. */
+    _total_buffer_size = _input_buffer_size;
+    OE_ADD_SIZE(_total_buffer_size, _output_buffer_size);
+    _buffer = (uint8_t*)oe_malloc(_total_buffer_size);
+    _input_buffer = _buffer;
+    _output_buffer = _buffer + _input_buffer_size;
+    if (_buffer == NULL)
+    {
+        _result = OE_OUT_OF_MEMORY;
+        goto done;
+    }
+    
+    /* Serialize buffer inputs (in and in-out parameters). */
+    _pargs_in = (oe_sgx_init_context_switchless_ecall_args_t*)_input_buffer;
+    OE_ADD_SIZE(_input_buffer_offset, sizeof(*_pargs_in));
+    /* There were no in nor in-out parameters. */
+    
+    /* Copy args structure (now filled) to input buffer. */
+    memcpy(_pargs_in, &_args, sizeof(*_pargs_in));
+
+    /* Call enclave function. */
+    if ((_result = oe_call_enclave_function(
+             enclave,
+             remoteattestation_fcn_id_oe_sgx_init_context_switchless_ecall,
+             _input_buffer,
+             _input_buffer_size,
+             _output_buffer,
+             _output_buffer_size,
+             &_output_bytes_written)) != OE_OK)
+        goto done;
+
+    /* Setup output arg struct pointer. */
+    _pargs_out = (oe_sgx_init_context_switchless_ecall_args_t*)_output_buffer;
+    OE_ADD_SIZE(_output_buffer_offset, sizeof(*_pargs_out));
+    
+    /* Check if the call succeeded. */
+    if ((_result = _pargs_out->_result) != OE_OK)
+        goto done;
+    
+    /* Currently exactly _output_buffer_size bytes must be written. */
+    if (_output_bytes_written != _output_buffer_size)
+    {
+        _result = OE_FAILURE;
+        goto done;
+    }
+    
+    /* Unmarshal return value and out, in-out parameters. */
+    *_retval = _pargs_out->_retval;
+    /* No pointers to restore for deep copy. */
+    /* There were no out nor in-out parameters. */
+
+    _result = OE_OK;
+
+done:
+    if (_buffer)
+        free(_buffer);
+
+    /* No `_ptrs` to free for deep copy. */
+
+    return _result;
+}
+
+oe_result_t oe_sgx_switchless_enclave_worker_thread_ecall(
+    oe_enclave_t* enclave,
+    oe_enclave_worker_context_t* context)
+{
+    oe_result_t _result = OE_FAILURE;
+
+    /* Marshalling struct. */
+    oe_sgx_switchless_enclave_worker_thread_ecall_args_t _args, *_pargs_in = NULL, *_pargs_out = NULL;
+
+    /* Marshalling buffer and sizes. */
+    size_t _input_buffer_size = 0;
+    size_t _output_buffer_size = 0;
+    size_t _total_buffer_size = 0;
+    uint8_t* _buffer = NULL;
+    uint8_t* _input_buffer = NULL;
+    uint8_t* _output_buffer = NULL;
+    size_t _input_buffer_offset = 0;
+    size_t _output_buffer_offset = 0;
+    size_t _output_bytes_written = 0;
+
+    /* Deep copy buffer. */
+    /* No pointers to save for deep copy. */
+
+    /* Fill marshalling struct. */
+    memset(&_args, 0, sizeof(_args));
+    _args.context = (oe_enclave_worker_context_t*)context;
+
+    /* Compute input buffer size. Include in and in-out parameters. */
+    OE_ADD_SIZE(_input_buffer_size, sizeof(oe_sgx_switchless_enclave_worker_thread_ecall_args_t));
+    /* There were no corresponding parameters. */
+    
+    /* Compute output buffer size. Include out and in-out parameters. */
+    OE_ADD_SIZE(_output_buffer_size, sizeof(oe_sgx_switchless_enclave_worker_thread_ecall_args_t));
+    /* There were no corresponding parameters. */
+    
+    /* Allocate marshalling buffer. */
+    _total_buffer_size = _input_buffer_size;
+    OE_ADD_SIZE(_total_buffer_size, _output_buffer_size);
+    _buffer = (uint8_t*)oe_malloc(_total_buffer_size);
+    _input_buffer = _buffer;
+    _output_buffer = _buffer + _input_buffer_size;
+    if (_buffer == NULL)
+    {
+        _result = OE_OUT_OF_MEMORY;
+        goto done;
+    }
+    
+    /* Serialize buffer inputs (in and in-out parameters). */
+    _pargs_in = (oe_sgx_switchless_enclave_worker_thread_ecall_args_t*)_input_buffer;
+    OE_ADD_SIZE(_input_buffer_offset, sizeof(*_pargs_in));
+    /* There were no in nor in-out parameters. */
+    
+    /* Copy args structure (now filled) to input buffer. */
+    memcpy(_pargs_in, &_args, sizeof(*_pargs_in));
+
+    /* Call enclave function. */
+    if ((_result = oe_call_enclave_function(
+             enclave,
+             remoteattestation_fcn_id_oe_sgx_switchless_enclave_worker_thread_ecall,
+             _input_buffer,
+             _input_buffer_size,
+             _output_buffer,
+             _output_buffer_size,
+             &_output_bytes_written)) != OE_OK)
+        goto done;
+
+    /* Setup output arg struct pointer. */
+    _pargs_out = (oe_sgx_switchless_enclave_worker_thread_ecall_args_t*)_output_buffer;
+    OE_ADD_SIZE(_output_buffer_offset, sizeof(*_pargs_out));
+    
+    /* Check if the call succeeded. */
+    if ((_result = _pargs_out->_result) != OE_OK)
+        goto done;
+    
+    /* Currently exactly _output_buffer_size bytes must be written. */
+    if (_output_bytes_written != _output_buffer_size)
+    {
+        _result = OE_FAILURE;
+        goto done;
+    }
+    
+    /* Unmarshal return value and out, in-out parameters. */
+    /* No return value. */
+    /* No pointers to restore for deep copy. */
+    /* There were no out nor in-out parameters. */
+
+    _result = OE_OK;
+
+done:
+    if (_buffer)
+        free(_buffer);
+
+    /* No `_ptrs` to free for deep copy. */
+
+    return _result;
+}
+
+/**** Untrusted function IDs. ****/
+enum
+{
+    remoteattestation_fcn_id_oe_get_supported_attester_format_ids_ocall = 0,
+    remoteattestation_fcn_id_oe_get_qetarget_info_ocall = 1,
+    remoteattestation_fcn_id_oe_get_quote_ocall = 2,
+    remoteattestation_fcn_id_oe_get_quote_verification_collateral_ocall = 3,
+    remoteattestation_fcn_id_oe_sgx_get_cpuid_table_ocall = 4,
+    remoteattestation_fcn_id_oe_sgx_backtrace_symbols_ocall = 5,
+    remoteattestation_fcn_id_oe_sgx_thread_wake_wait_ocall = 6,
+    remoteattestation_fcn_id_oe_sgx_wake_switchless_worker_ocall = 7,
+    remoteattestation_fcn_id_oe_sgx_sleep_switchless_worker_ocall = 8,
+    remoteattestation_fcn_id_untrusted_call_max = OE_ENUM_MAX
+};
+
+/**** OCALL marshalling structs. ****/
+typedef struct _oe_get_supported_attester_format_ids_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    void* format_ids;
+    size_t format_ids_size;
+    size_t* format_ids_size_out;
+} oe_get_supported_attester_format_ids_ocall_args_t;
+
+typedef struct _oe_get_qetarget_info_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    oe_uuid_t* format_id;
+    void* opt_params;
+    size_t opt_params_size;
+    sgx_target_info_t* target_info;
+} oe_get_qetarget_info_ocall_args_t;
+
+typedef struct _oe_get_quote_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    oe_uuid_t* format_id;
+    void* opt_params;
+    size_t opt_params_size;
+    sgx_report_t* sgx_report;
+    void* quote;
+    size_t quote_size;
+    size_t* quote_size_out;
+} oe_get_quote_ocall_args_t;
+
+typedef struct _oe_get_quote_verification_collateral_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    uint8_t* fmspc;
+    uint8_t collateral_provider;
+    void* tcb_info;
+    size_t tcb_info_size;
+    size_t* tcb_info_size_out;
+    void* tcb_info_issuer_chain;
+    size_t tcb_info_issuer_chain_size;
+    size_t* tcb_info_issuer_chain_size_out;
+    void* pck_crl;
+    size_t pck_crl_size;
+    size_t* pck_crl_size_out;
+    void* root_ca_crl;
+    size_t root_ca_crl_size;
+    size_t* root_ca_crl_size_out;
+    void* pck_crl_issuer_chain;
+    size_t pck_crl_issuer_chain_size;
+    size_t* pck_crl_issuer_chain_size_out;
+    void* qe_identity;
+    size_t qe_identity_size;
+    size_t* qe_identity_size_out;
+    void* qe_identity_issuer_chain;
+    size_t qe_identity_issuer_chain_size;
+    size_t* qe_identity_issuer_chain_size_out;
+} oe_get_quote_verification_collateral_ocall_args_t;
+
+typedef struct _oe_sgx_get_cpuid_table_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    void* cpuid_table_buffer;
+    size_t cpuid_table_buffer_size;
+} oe_sgx_get_cpuid_table_ocall_args_t;
+
+typedef struct _oe_sgx_backtrace_symbols_ocall_args_t
+{
+    oe_result_t _result;
+    oe_result_t _retval;
+    oe_enclave_t* oe_enclave;
+    uint64_t* buffer;
+    size_t size;
+    void* symbols_buffer;
+    size_t symbols_buffer_size;
+    size_t* symbols_buffer_size_out;
+} oe_sgx_backtrace_symbols_ocall_args_t;
+
+typedef struct _oe_sgx_thread_wake_wait_ocall_args_t
+{
+    oe_result_t _result;
+    oe_enclave_t* oe_enclave;
+    uint64_t waiter_tcs;
+    uint64_t self_tcs;
+} oe_sgx_thread_wake_wait_ocall_args_t;
+
+typedef struct _oe_sgx_wake_switchless_worker_ocall_args_t
+{
+    oe_result_t _result;
+    oe_host_worker_context_t* context;
+} oe_sgx_wake_switchless_worker_ocall_args_t;
+
+typedef struct _oe_sgx_sleep_switchless_worker_ocall_args_t
+{
+    oe_result_t _result;
+    oe_enclave_worker_context_t* context;
+} oe_sgx_sleep_switchless_worker_ocall_args_t;
+
 /**** OCALL functions. ****/
 
-/* There were no ocalls. */
+static void ocall_oe_get_supported_attester_format_ids_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_get_supported_attester_format_ids_ocall_args_t* pargs_in = (oe_get_supported_attester_format_ids_ocall_args_t*)input_buffer;
+    oe_get_supported_attester_format_ids_ocall_args_t* pargs_out = (oe_get_supported_attester_format_ids_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    /* There were no in nor in-out parameters. */
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->format_ids)
+        OE_SET_OUT_POINTER(format_ids, pargs_in->format_ids_size, void*);
+    if (pargs_in->format_ids_size_out)
+        OE_SET_OUT_POINTER(format_ids_size_out, sizeof(size_t), size_t*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_get_supported_attester_format_ids_ocall(
+        pargs_in->format_ids,
+        pargs_in->format_ids_size,
+        pargs_in->format_ids_size_out);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_get_qetarget_info_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_get_qetarget_info_ocall_args_t* pargs_in = (oe_get_qetarget_info_ocall_args_t*)input_buffer;
+    oe_get_qetarget_info_ocall_args_t* pargs_out = (oe_get_qetarget_info_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    if (pargs_in->format_id)
+        OE_SET_IN_POINTER(format_id, sizeof(oe_uuid_t), oe_uuid_t*);
+    if (pargs_in->opt_params)
+        OE_SET_IN_POINTER(opt_params, pargs_in->opt_params_size, void*);
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->target_info)
+        OE_SET_OUT_POINTER(target_info, sizeof(sgx_target_info_t), sgx_target_info_t*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_get_qetarget_info_ocall(
+        (const oe_uuid_t*)pargs_in->format_id,
+        (const void*)pargs_in->opt_params,
+        pargs_in->opt_params_size,
+        pargs_in->target_info);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_get_quote_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_get_quote_ocall_args_t* pargs_in = (oe_get_quote_ocall_args_t*)input_buffer;
+    oe_get_quote_ocall_args_t* pargs_out = (oe_get_quote_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    if (pargs_in->format_id)
+        OE_SET_IN_POINTER(format_id, sizeof(oe_uuid_t), oe_uuid_t*);
+    if (pargs_in->opt_params)
+        OE_SET_IN_POINTER(opt_params, pargs_in->opt_params_size, void*);
+    if (pargs_in->sgx_report)
+        OE_SET_IN_POINTER(sgx_report, sizeof(sgx_report_t), sgx_report_t*);
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->quote)
+        OE_SET_OUT_POINTER(quote, pargs_in->quote_size, void*);
+    if (pargs_in->quote_size_out)
+        OE_SET_OUT_POINTER(quote_size_out, sizeof(size_t), size_t*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_get_quote_ocall(
+        (const oe_uuid_t*)pargs_in->format_id,
+        (const void*)pargs_in->opt_params,
+        pargs_in->opt_params_size,
+        (const sgx_report_t*)pargs_in->sgx_report,
+        pargs_in->quote,
+        pargs_in->quote_size,
+        pargs_in->quote_size_out);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_get_quote_verification_collateral_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_get_quote_verification_collateral_ocall_args_t* pargs_in = (oe_get_quote_verification_collateral_ocall_args_t*)input_buffer;
+    oe_get_quote_verification_collateral_ocall_args_t* pargs_out = (oe_get_quote_verification_collateral_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    if (pargs_in->fmspc)
+        OE_SET_IN_POINTER(fmspc, sizeof(uint8_t[6]), uint8_t*);
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->tcb_info)
+        OE_SET_OUT_POINTER(tcb_info, pargs_in->tcb_info_size, void*);
+    if (pargs_in->tcb_info_size_out)
+        OE_SET_OUT_POINTER(tcb_info_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->tcb_info_issuer_chain)
+        OE_SET_OUT_POINTER(tcb_info_issuer_chain, pargs_in->tcb_info_issuer_chain_size, void*);
+    if (pargs_in->tcb_info_issuer_chain_size_out)
+        OE_SET_OUT_POINTER(tcb_info_issuer_chain_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->pck_crl)
+        OE_SET_OUT_POINTER(pck_crl, pargs_in->pck_crl_size, void*);
+    if (pargs_in->pck_crl_size_out)
+        OE_SET_OUT_POINTER(pck_crl_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->root_ca_crl)
+        OE_SET_OUT_POINTER(root_ca_crl, pargs_in->root_ca_crl_size, void*);
+    if (pargs_in->root_ca_crl_size_out)
+        OE_SET_OUT_POINTER(root_ca_crl_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->pck_crl_issuer_chain)
+        OE_SET_OUT_POINTER(pck_crl_issuer_chain, pargs_in->pck_crl_issuer_chain_size, void*);
+    if (pargs_in->pck_crl_issuer_chain_size_out)
+        OE_SET_OUT_POINTER(pck_crl_issuer_chain_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->qe_identity)
+        OE_SET_OUT_POINTER(qe_identity, pargs_in->qe_identity_size, void*);
+    if (pargs_in->qe_identity_size_out)
+        OE_SET_OUT_POINTER(qe_identity_size_out, sizeof(size_t), size_t*);
+    if (pargs_in->qe_identity_issuer_chain)
+        OE_SET_OUT_POINTER(qe_identity_issuer_chain, pargs_in->qe_identity_issuer_chain_size, void*);
+    if (pargs_in->qe_identity_issuer_chain_size_out)
+        OE_SET_OUT_POINTER(qe_identity_issuer_chain_size_out, sizeof(size_t), size_t*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_get_quote_verification_collateral_ocall(
+        *(uint8_t(*)[6])pargs_in->fmspc,
+        pargs_in->collateral_provider,
+        pargs_in->tcb_info,
+        pargs_in->tcb_info_size,
+        pargs_in->tcb_info_size_out,
+        pargs_in->tcb_info_issuer_chain,
+        pargs_in->tcb_info_issuer_chain_size,
+        pargs_in->tcb_info_issuer_chain_size_out,
+        pargs_in->pck_crl,
+        pargs_in->pck_crl_size,
+        pargs_in->pck_crl_size_out,
+        pargs_in->root_ca_crl,
+        pargs_in->root_ca_crl_size,
+        pargs_in->root_ca_crl_size_out,
+        pargs_in->pck_crl_issuer_chain,
+        pargs_in->pck_crl_issuer_chain_size,
+        pargs_in->pck_crl_issuer_chain_size_out,
+        pargs_in->qe_identity,
+        pargs_in->qe_identity_size,
+        pargs_in->qe_identity_size_out,
+        pargs_in->qe_identity_issuer_chain,
+        pargs_in->qe_identity_issuer_chain_size,
+        pargs_in->qe_identity_issuer_chain_size_out);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_sgx_get_cpuid_table_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_sgx_get_cpuid_table_ocall_args_t* pargs_in = (oe_sgx_get_cpuid_table_ocall_args_t*)input_buffer;
+    oe_sgx_get_cpuid_table_ocall_args_t* pargs_out = (oe_sgx_get_cpuid_table_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    /* There were no in nor in-out parameters. */
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->cpuid_table_buffer)
+        OE_SET_OUT_POINTER(cpuid_table_buffer, pargs_in->cpuid_table_buffer_size, void*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_sgx_get_cpuid_table_ocall(
+        pargs_in->cpuid_table_buffer,
+        pargs_in->cpuid_table_buffer_size);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_sgx_backtrace_symbols_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_sgx_backtrace_symbols_ocall_args_t* pargs_in = (oe_sgx_backtrace_symbols_ocall_args_t*)input_buffer;
+    oe_sgx_backtrace_symbols_ocall_args_t* pargs_out = (oe_sgx_backtrace_symbols_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    if (pargs_in->buffer)
+        OE_SET_IN_POINTER(buffer, ((size_t)pargs_in->size * sizeof(uint64_t)), uint64_t*);
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    if (pargs_in->symbols_buffer)
+        OE_SET_OUT_POINTER(symbols_buffer, pargs_in->symbols_buffer_size, void*);
+    if (pargs_in->symbols_buffer_size_out)
+        OE_SET_OUT_POINTER(symbols_buffer_size_out, sizeof(size_t), size_t*);
+
+    /* Call user function. */
+    pargs_out->_retval = oe_sgx_backtrace_symbols_ocall(
+        pargs_in->oe_enclave,
+        (const uint64_t*)pargs_in->buffer,
+        pargs_in->size,
+        pargs_in->symbols_buffer,
+        pargs_in->symbols_buffer_size,
+        pargs_in->symbols_buffer_size_out);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_sgx_thread_wake_wait_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_sgx_thread_wake_wait_ocall_args_t* pargs_in = (oe_sgx_thread_wake_wait_ocall_args_t*)input_buffer;
+    oe_sgx_thread_wake_wait_ocall_args_t* pargs_out = (oe_sgx_thread_wake_wait_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    /* There were no in nor in-out parameters. */
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    /* There were no out nor in-out parameters. */
+
+    /* Call user function. */
+    oe_sgx_thread_wake_wait_ocall(
+        pargs_in->oe_enclave,
+        pargs_in->waiter_tcs,
+        pargs_in->self_tcs);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_sgx_wake_switchless_worker_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_sgx_wake_switchless_worker_ocall_args_t* pargs_in = (oe_sgx_wake_switchless_worker_ocall_args_t*)input_buffer;
+    oe_sgx_wake_switchless_worker_ocall_args_t* pargs_out = (oe_sgx_wake_switchless_worker_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    /* There were no in nor in-out parameters. */
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    /* There were no out nor in-out parameters. */
+
+    /* Call user function. */
+    oe_sgx_wake_switchless_worker_ocall(
+        pargs_in->context);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
+static void ocall_oe_sgx_sleep_switchless_worker_ocall(
+    uint8_t* input_buffer,
+    size_t input_buffer_size,
+    uint8_t* output_buffer,
+    size_t output_buffer_size,
+    size_t* output_bytes_written)
+{
+    oe_result_t _result = OE_FAILURE;
+    OE_UNUSED(input_buffer_size);
+
+    /* Prepare parameters. */
+    oe_sgx_sleep_switchless_worker_ocall_args_t* pargs_in = (oe_sgx_sleep_switchless_worker_ocall_args_t*)input_buffer;
+    oe_sgx_sleep_switchless_worker_ocall_args_t* pargs_out = (oe_sgx_sleep_switchless_worker_ocall_args_t*)output_buffer;
+
+    size_t input_buffer_offset = 0;
+    size_t output_buffer_offset = 0;
+    OE_ADD_SIZE(input_buffer_offset, sizeof(*pargs_in));
+    OE_ADD_SIZE(output_buffer_offset, sizeof(*pargs_out));
+
+    /* Make sure input and output buffers are valid. */
+    if (!input_buffer || !output_buffer) {
+        _result = OE_INVALID_PARAMETER;
+        goto done;
+    }
+
+    /* Set in and in-out pointers. */
+    /* There were no in nor in-out parameters. */
+
+    /* Set out and in-out pointers. */
+    /* In-out parameters are copied to output buffer. */
+    /* There were no out nor in-out parameters. */
+
+    /* Call user function. */
+    oe_sgx_sleep_switchless_worker_ocall(
+        pargs_in->context);
+
+    /* Propagate errno back to enclave. */
+    /* Errno propagation not enabled. */
+
+    /* Success. */
+    _result = OE_OK;
+    *output_bytes_written = output_buffer_offset;
+
+done:
+    if (pargs_out && output_buffer_size >= sizeof(*pargs_out))
+        pargs_out->_result = _result;
+}
+
 /**** OCALL function table. ****/
 
 static oe_ocall_func_t __remoteattestation_ocall_function_table[] = {
-    
+    (oe_ocall_func_t) ocall_oe_get_supported_attester_format_ids_ocall,
+    (oe_ocall_func_t) ocall_oe_get_qetarget_info_ocall,
+    (oe_ocall_func_t) ocall_oe_get_quote_ocall,
+    (oe_ocall_func_t) ocall_oe_get_quote_verification_collateral_ocall,
+    (oe_ocall_func_t) ocall_oe_sgx_get_cpuid_table_ocall,
+    (oe_ocall_func_t) ocall_oe_sgx_backtrace_symbols_ocall,
+    (oe_ocall_func_t) ocall_oe_sgx_thread_wake_wait_ocall,
+    (oe_ocall_func_t) ocall_oe_sgx_wake_switchless_worker_ocall,
+    (oe_ocall_func_t) ocall_oe_sgx_sleep_switchless_worker_ocall,
     NULL
 };
 
@@ -148,7 +1378,7 @@ oe_result_t oe_create_remoteattestation_enclave(
                settings,
                setting_count,
                __remoteattestation_ocall_function_table,
-               0,
+               9,
                enclave);
 }
 

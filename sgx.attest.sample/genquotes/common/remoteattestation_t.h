@@ -10,24 +10,6 @@
 
 OE_EXTERNC_BEGIN
 
-/**** Trusted function IDs ****/
-enum
-{
-    remoteattestation_fcn_id_get_remote_report_with_pubkey = 0,
-    remoteattestation_fcn_id_trusted_call_id_max = OE_ENUM_MAX
-};
-
-/**** ECALL marshalling structs. ****/
-typedef struct _get_remote_report_with_pubkey_args_t
-{
-    oe_result_t _result;
-    int _retval;
-    uint8_t** pem_key;
-    size_t* key_size;
-    uint8_t** remote_report;
-    size_t* remote_report_size;
-} get_remote_report_with_pubkey_args_t;
-
 /**** ECALL prototypes. ****/
 int get_remote_report_with_pubkey(
     uint8_t** pem_key,
@@ -35,18 +17,101 @@ int get_remote_report_with_pubkey(
     uint8_t** remote_report,
     size_t* remote_report_size);
 
-/**** Untrusted function IDs. ****/
-enum
-{
+oe_result_t oe_get_sgx_report_ecall(
+    const void* opt_params,
+    size_t opt_params_size,
+    sgx_report_t* report);
 
-    remoteattestation_fcn_id_untrusted_call_max = OE_ENUM_MAX
-};
+oe_result_t oe_get_report_v2_ecall(
+    uint32_t flags,
+    const void* opt_params,
+    size_t opt_params_size,
+    uint8_t** report_buffer,
+    size_t* report_buffer_size);
 
-/**** OCALL marshalling structs. ****/
-/* There were no ocalls. */
+oe_result_t oe_verify_local_report_ecall(
+    const uint8_t* report,
+    size_t report_size,
+    oe_report_t* parsed_report);
+
+oe_result_t oe_sgx_init_context_switchless_ecall(
+    oe_host_worker_context_t* host_worker_contexts,
+    uint64_t num_host_workers);
+
+void oe_sgx_switchless_enclave_worker_thread_ecall(oe_enclave_worker_context_t* context);
 
 /**** OCALL prototypes. ****/
-/* There were no ocalls. */
+oe_result_t oe_get_supported_attester_format_ids_ocall(
+    oe_result_t* _retval,
+    void* format_ids,
+    size_t format_ids_size,
+    size_t* format_ids_size_out);
+
+oe_result_t oe_get_qetarget_info_ocall(
+    oe_result_t* _retval,
+    const oe_uuid_t* format_id,
+    const void* opt_params,
+    size_t opt_params_size,
+    sgx_target_info_t* target_info);
+
+oe_result_t oe_get_quote_ocall(
+    oe_result_t* _retval,
+    const oe_uuid_t* format_id,
+    const void* opt_params,
+    size_t opt_params_size,
+    const sgx_report_t* sgx_report,
+    void* quote,
+    size_t quote_size,
+    size_t* quote_size_out);
+
+oe_result_t oe_get_quote_verification_collateral_ocall(
+    oe_result_t* _retval,
+    uint8_t fmspc[6],
+    uint8_t collateral_provider,
+    void* tcb_info,
+    size_t tcb_info_size,
+    size_t* tcb_info_size_out,
+    void* tcb_info_issuer_chain,
+    size_t tcb_info_issuer_chain_size,
+    size_t* tcb_info_issuer_chain_size_out,
+    void* pck_crl,
+    size_t pck_crl_size,
+    size_t* pck_crl_size_out,
+    void* root_ca_crl,
+    size_t root_ca_crl_size,
+    size_t* root_ca_crl_size_out,
+    void* pck_crl_issuer_chain,
+    size_t pck_crl_issuer_chain_size,
+    size_t* pck_crl_issuer_chain_size_out,
+    void* qe_identity,
+    size_t qe_identity_size,
+    size_t* qe_identity_size_out,
+    void* qe_identity_issuer_chain,
+    size_t qe_identity_issuer_chain_size,
+    size_t* qe_identity_issuer_chain_size_out);
+
+oe_result_t oe_sgx_get_cpuid_table_ocall(
+    oe_result_t* _retval,
+    void* cpuid_table_buffer,
+    size_t cpuid_table_buffer_size);
+
+oe_result_t oe_sgx_backtrace_symbols_ocall(
+    oe_result_t* _retval,
+    oe_enclave_t* oe_enclave,
+    const uint64_t* buffer,
+    size_t size,
+    void* symbols_buffer,
+    size_t symbols_buffer_size,
+    size_t* symbols_buffer_size_out);
+
+oe_result_t oe_sgx_thread_wake_wait_ocall(
+    oe_enclave_t* oe_enclave,
+    uint64_t waiter_tcs,
+    uint64_t self_tcs);
+
+oe_result_t oe_sgx_wake_switchless_worker_ocall(oe_host_worker_context_t* context);
+
+oe_result_t oe_sgx_sleep_switchless_worker_ocall(oe_enclave_worker_context_t* context);
 
 OE_EXTERNC_END
 
