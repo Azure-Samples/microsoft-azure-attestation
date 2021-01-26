@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using validatequotes.Helpers;
 
 namespace validatequotes
@@ -48,7 +50,8 @@ namespace validatequotes
 
             // Send to service for attestation
             var maaService = new MaaService(this.attestDnsName);
-            var serviceJwtToken = await maaService.AttestOpenEnclaveAsync(enclaveInfo.GetMaaBody());
+            var serviceResponse = await maaService.AttestOpenEnclaveAsync(enclaveInfo.GetMaaBody());
+            var serviceJwtToken = JObject.Parse(serviceResponse)["token"].ToString();
 
             // Analyze results
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - BASICS");

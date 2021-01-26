@@ -20,12 +20,7 @@ namespace validatequotes
 
         public AttestOpenEnclaveRequestBody GetMaaBody()
         {
-            var maaBody = new AttestOpenEnclaveRequestBody
-            {
-                Quote = HexHelper.ConvertHexToBase64Url(QuoteHex),
-                EnclaveHeldData = HexHelper.ConvertHexToBase64Url(EnclaveHeldDataHex)
-            };
-            return maaBody;
+            return new AttestOpenEnclaveRequestBody(this);
         }
 
         public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)

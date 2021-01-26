@@ -13,7 +13,7 @@ namespace validatequotes
 
         static MaaService()
         {
-            theHttpClient = new HttpClient(new AuthenticationDelegatingHandler());
+            theHttpClient = new HttpClient();
         }
 
         public MaaService(string providerDnsName)
@@ -24,9 +24,9 @@ namespace validatequotes
         public async Task<string> AttestOpenEnclaveAsync(AttestOpenEnclaveRequestBody requestBody)
         {
             // Build request
-            var uri = $"https://{providerDnsName}:443/attest/Tee/OpenEnclave?api-version=2018-09-01-preview";
+            var uri = $"https://{providerDnsName}:443/attest/OpenEnclave?api-version=2020-10-01";
             var request = new HttpRequestMessage(HttpMethod.Post, uri);
-            request.Content = new StringContent(JsonConvert.SerializeObject(requestBody));
+            request.Content = new StringContent(JsonConvert.SerializeObject(requestBody), null, "application/json");
 
             // Send request
             var response = await theHttpClient.SendAsync(request);
