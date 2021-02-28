@@ -89,13 +89,12 @@ To build and run the samples:
 1. To build, run and generate the JSON files do the following:
     1. ```cd genquotes```
     1. ```make build```
-    1. ```make run```
+    1. ```sudo make run```
     1. This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```../quotes``` directory.
 1. To build, run and validate the JSON files with Azure Attestation do the following:
     1. ```cd validatequotes.core```
     1. ```./runall.sh```
     1. This builds and runs the validation application against the four different JSON files produced earlier.
-    1. The runall.sh script assumes you have access to the sharedcus.cus.attest.azure.net attestation provider.  If you don't, edit the [runall.sh](./sgx.attest.sample/validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
 
 The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
@@ -107,7 +106,7 @@ The four different JSON files are:
 Here is an example of what the output of ```make run``` should look like:
 
 ```
-greg@acc-ubuntu-1:~/src/aas/openenclave/maa-samples/genquotes$ make run
+greg@gnksgxlinuxvm0:~/src/github/maa-sample/sgx.attest.sample/genquotes$ sudo make run
 host/genquote_host ./enclave/genquote_enclave.debug.signed              enclave.info.debug.json
     JSON file created: enclave.info.debug.json
 host/genquote_host ./enclave/genquote_enclave.release.signed            enclave.info.release.json
@@ -122,63 +121,111 @@ host/genquote_host ./enclave/genquote_enclave.securityversion.signed    enclave.
 Here is an example of what the output of ```./runall.sh``` should look like:
 
 ```
-greg@acc-ubuntu-1:~/src/attestation/sgx.attest.sample/validatequotes$ ./runall.sh 
-05/04/2020 12:32:28 : 
-05/04/2020 12:32:28 : Validating file '../genquotes/quotes/enclave.info.debug.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
-05/04/2020 12:32:28 : 
-05/04/2020 12:32:31 : JWT JKU location validation:        True
-05/04/2020 12:32:32 : JWT signature validation:           True
-05/04/2020 12:32:32 : JWT issuer claim validation:        True
-05/04/2020 12:32:32 : JWT signing cert issuer validation: True
-05/04/2020 12:32:32 : IsDebuggable check:                 True
-05/04/2020 12:32:32 : MRENCLAVE check:                    True
-05/04/2020 12:32:32 : MRSIGNER check:                     True
-05/04/2020 12:32:32 : ProductID check:                    True
-05/04/2020 12:32:32 : Security Version check:             True
-05/04/2020 12:32:32 : Enclave Held Data check:            True
-05/04/2020 12:32:32 : 
-05/04/2020 12:32:33 : 
-05/04/2020 12:32:33 : Validating file '../genquotes/quotes/enclave.info.release.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
-05/04/2020 12:32:33 : 
-05/04/2020 12:32:36 : JWT JKU location validation:        True
-05/04/2020 12:32:37 : JWT signature validation:           True
-05/04/2020 12:32:37 : JWT issuer claim validation:        True
-05/04/2020 12:32:37 : JWT signing cert issuer validation: True
-05/04/2020 12:32:37 : IsDebuggable check:                 True
-05/04/2020 12:32:37 : MRENCLAVE check:                    True
-05/04/2020 12:32:37 : MRSIGNER check:                     True
-05/04/2020 12:32:37 : ProductID check:                    True
-05/04/2020 12:32:37 : Security Version check:             True
-05/04/2020 12:32:37 : Enclave Held Data check:            True
-05/04/2020 12:32:37 : 
-05/04/2020 12:32:38 : 
-05/04/2020 12:32:38 : Validating file '../genquotes/quotes/enclave.info.prodid.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
-05/04/2020 12:32:38 : 
-05/04/2020 12:32:40 : JWT JKU location validation:        True
-05/04/2020 12:32:42 : JWT signature validation:           True
-05/04/2020 12:32:42 : JWT issuer claim validation:        True
-05/04/2020 12:32:42 : JWT signing cert issuer validation: True
-05/04/2020 12:32:42 : IsDebuggable check:                 True
-05/04/2020 12:32:42 : MRENCLAVE check:                    True
-05/04/2020 12:32:42 : MRSIGNER check:                     True
-05/04/2020 12:32:42 : ProductID check:                    True
-05/04/2020 12:32:42 : Security Version check:             True
-05/04/2020 12:32:42 : Enclave Held Data check:            True
-05/04/2020 12:32:42 : 
-05/04/2020 12:32:43 : 
-05/04/2020 12:32:43 : Validating file '../genquotes/quotes/enclave.info.securityversion.json' against attestation provider 'sharedcus.cus.attest.azure.net' with include details 'False'
-05/04/2020 12:32:43 : 
-05/04/2020 12:32:45 : JWT JKU location validation:        True
-05/04/2020 12:32:47 : JWT signature validation:           True
-05/04/2020 12:32:47 : JWT issuer claim validation:        True
-05/04/2020 12:32:47 : JWT signing cert issuer validation: True
-05/04/2020 12:32:47 : IsDebuggable check:                 True
-05/04/2020 12:32:47 : MRENCLAVE check:                    True
-05/04/2020 12:32:47 : MRSIGNER check:                     True
-05/04/2020 12:32:47 : ProductID check:                    True
-05/04/2020 12:32:47 : Security Version check:             True
-05/04/2020 12:32:47 : Enclave Held Data check:            True
-05/04/2020 12:32:47 : 
+greg@gnksgxlinuxvm0:~/src/github/maa-sample/sgx.attest.sample/validatequotes.core$ ./runall.sh 
+[16:52:29.213] : 
+[16:52:29.235] : ************************************************************************************************************************
+[16:52:29.235] : *      PARAMETERS FOR THIS RUN
+[16:52:29.235] : ************************************************************************************************************************
+[16:52:29.235] : Validating filename                : ../genquotes/quotes/enclave.info.debug.json
+[16:52:29.235] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[16:52:29.235] : Including details                  : False
+[16:52:29.870] : 
+[16:52:29.870] : ************************************************************************************************************************
+[16:52:29.870] : *      VALIDATING MAA JWT TOKEN - BASICS
+[16:52:29.870] : ************************************************************************************************************************
+[16:52:29.893] : JWT JKU location validation        : True
+[16:52:30.325] : JWT signature validation           : True
+[16:52:30.326] : JWT issuer claim validation        : True
+[16:52:30.326] : JWT signing cert issuer validation : True
+[16:52:30.326] : 
+[16:52:30.326] : ************************************************************************************************************************
+[16:52:30.326] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[16:52:30.326] : ************************************************************************************************************************
+[16:52:30.328] : IsDebuggable match                 : True
+[16:52:30.328] : MRENCLAVE match                    : True
+[16:52:30.328] : MRSIGNER match                     : True
+[16:52:30.329] : ProductID match                    : True
+[16:52:30.329] : Security Version match             : True
+[16:52:30.329] : Enclave Held Data match            : True
+[16:52:30.329] : 
+[16:52:31.485] : 
+[16:52:31.507] : ************************************************************************************************************************
+[16:52:31.507] : *      PARAMETERS FOR THIS RUN
+[16:52:31.507] : ************************************************************************************************************************
+[16:52:31.507] : Validating filename                : ../genquotes/quotes/enclave.info.release.json
+[16:52:31.507] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[16:52:31.507] : Including details                  : False
+[16:52:31.976] : 
+[16:52:31.976] : ************************************************************************************************************************
+[16:52:31.976] : *      VALIDATING MAA JWT TOKEN - BASICS
+[16:52:31.976] : ************************************************************************************************************************
+[16:52:32.011] : JWT JKU location validation        : True
+[16:52:32.477] : JWT signature validation           : True
+[16:52:32.477] : JWT issuer claim validation        : True
+[16:52:32.478] : JWT signing cert issuer validation : True
+[16:52:32.478] : 
+[16:52:32.478] : ************************************************************************************************************************
+[16:52:32.478] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[16:52:32.478] : ************************************************************************************************************************
+[16:52:32.480] : IsDebuggable match                 : True
+[16:52:32.480] : MRENCLAVE match                    : True
+[16:52:32.480] : MRSIGNER match                     : True
+[16:52:32.480] : ProductID match                    : True
+[16:52:32.480] : Security Version match             : True
+[16:52:32.480] : Enclave Held Data match            : True
+[16:52:32.480] : 
+[16:52:33.641] : 
+[16:52:33.662] : ************************************************************************************************************************
+[16:52:33.662] : *      PARAMETERS FOR THIS RUN
+[16:52:33.662] : ************************************************************************************************************************
+[16:52:33.662] : Validating filename                : ../genquotes/quotes/enclave.info.prodid.json
+[16:52:33.662] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[16:52:33.662] : Including details                  : False
+[16:52:34.195] : 
+[16:52:34.195] : ************************************************************************************************************************
+[16:52:34.195] : *      VALIDATING MAA JWT TOKEN - BASICS
+[16:52:34.195] : ************************************************************************************************************************
+[16:52:34.216] : JWT JKU location validation        : True
+[16:52:34.567] : JWT signature validation           : True
+[16:52:34.567] : JWT issuer claim validation        : True
+[16:52:34.567] : JWT signing cert issuer validation : True
+[16:52:34.567] : 
+[16:52:34.567] : ************************************************************************************************************************
+[16:52:34.567] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[16:52:34.567] : ************************************************************************************************************************
+[16:52:34.569] : IsDebuggable match                 : True
+[16:52:34.570] : MRENCLAVE match                    : True
+[16:52:34.570] : MRSIGNER match                     : True
+[16:52:34.570] : ProductID match                    : True
+[16:52:34.570] : Security Version match             : True
+[16:52:34.570] : Enclave Held Data match            : True
+[16:52:34.570] : 
+[16:52:35.705] : 
+[16:52:35.727] : ************************************************************************************************************************
+[16:52:35.727] : *      PARAMETERS FOR THIS RUN
+[16:52:35.727] : ************************************************************************************************************************
+[16:52:35.727] : Validating filename                : ../genquotes/quotes/enclave.info.securityversion.json
+[16:52:35.727] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[16:52:35.727] : Including details                  : False
+[16:52:36.328] : 
+[16:52:36.328] : ************************************************************************************************************************
+[16:52:36.328] : *      VALIDATING MAA JWT TOKEN - BASICS
+[16:52:36.328] : ************************************************************************************************************************
+[16:52:36.350] : JWT JKU location validation        : True
+[16:52:36.779] : JWT signature validation           : True
+[16:52:36.779] : JWT issuer claim validation        : True
+[16:52:36.779] : JWT signing cert issuer validation : True
+[16:52:36.779] : 
+[16:52:36.779] : ************************************************************************************************************************
+[16:52:36.779] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[16:52:36.779] : ************************************************************************************************************************
+[16:52:36.781] : IsDebuggable match                 : True
+[16:52:36.781] : MRENCLAVE match                    : True
+[16:52:36.782] : MRSIGNER match                     : True
+[16:52:36.782] : ProductID match                    : True
+[16:52:36.782] : Security Version match             : True
+[16:52:36.782] : Enclave Held Data match            : True
+[16:52:36.782] : 
 ```
 
 

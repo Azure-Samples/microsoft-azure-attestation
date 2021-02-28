@@ -59,8 +59,6 @@ namespace validatequotes
 
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO");
             enclaveInfo.CompareToMaaServiceJwtToken(serviceJwtToken, this.includeDetails);
-
-            Logger.WriteLine("\n\n");
         }
     }
 }

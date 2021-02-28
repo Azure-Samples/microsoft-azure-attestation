@@ -33,7 +33,6 @@ namespace validatequotes
             WriteLine(separatorLine);
             WriteLine($"*      {banner}");
             WriteLine(separatorLine);
-            WriteLine("");
         }
     }
 }
