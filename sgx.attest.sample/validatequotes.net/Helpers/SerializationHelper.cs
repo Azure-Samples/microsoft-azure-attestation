@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 
 namespace validatequotes
 {
@@ -9,12 +9,11 @@ namespace validatequotes
     {
         public static T ReadFromFile<T>(string filePath)
         {
-            ConstructorInfo defaultConstructorInfo = typeof(T).GetConstructor(new Type[] { });
-            T persistedObject = (T) defaultConstructorInfo.Invoke(new object[] { });
+            T persistedObject = default;
 
             try
             {
-                var deserializedObject = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
+                var deserializedObject = JsonSerializer.Deserialize<T>(File.ReadAllText(filePath));
                 if (deserializedObject != null)
                 {
                     persistedObject = deserializedObject;
@@ -30,7 +29,7 @@ namespace validatequotes
 
         public static void WriteToFile<T>(string fileName, T persistedObject)
         {
-            File.WriteAllText(fileName, JsonConvert.SerializeObject(persistedObject));
+            File.WriteAllText(fileName, JsonSerializer.Serialize(persistedObject));
         }
     }
 }

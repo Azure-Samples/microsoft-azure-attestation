@@ -23,15 +23,11 @@ extern "C"
 DECLARE_INTERFACE_IID(IVerifyMetadataCertificates, "46981BEA-6938-4D6F-8339-40C4CAC66E5B") : public IUnknown
 {
 public:
-	STDMETHOD(VerifyQuoteExtensionInCertificate)(LPCSTR base64encodedCertificate, bool* extensionFound) = 0;
-	STDMETHOD(VerifyQuoteInExtension)(bool* quoteIsValid) = 0;
-	STDMETHOD(VerifyCertificateKeyMatchesHash)(bool* certificateKeyIsValid) = 0;
+	STDMETHOD(VerifyQuoteInCertificate)(LPCSTR base64encodedCertificate, bool* extensionFound) = 0;
 	STDMETHOD(SecurityVersion)(uint32_t* version) = 0;
 	STDMETHOD(ProductId)(uint32_t* productIdSize, uint8_t** productId) = 0;
 	STDMETHOD(UniqueId)(uint32_t* uniqueIdSize, uint8_t** uniqueId) = 0;
 	STDMETHOD(SignerId)(uint32_t* signerIdSize, uint8_t** signerId) = 0;
-	STDMETHOD(ReportData)(uint32_t* reportDataSize, uint8_t** reportData) = 0;
-	STDMETHOD(PublicKeyHash)(uint32_t* publicKeyHashSize, uint8_t** publicKeyHash) = 0;
 };
 
 

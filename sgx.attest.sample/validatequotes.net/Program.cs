@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Azure.Identity;
+using Azure.Security.Attestation;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using validatequotes.Helpers;
@@ -19,7 +21,8 @@ namespace validatequotes
         public Program(string[] args)
         {
             this.fileName = args.Length > 0 ? args[0] : "../../../genquotes/quotes/enclave.info.debug.json";
-            this.attestDnsName = args.Length > 1 ? args[1] : "sharedeus2.eus2.attest.azure.net";
+            //            this.attestDnsName = args.Length > 1 ? args[1] : "sharedeus2.eus2.attest.azure.net";
+            this.attestDnsName = args.Length > 1 ? args[1] : "sharedwus.wus.attest.azure.net";
             this.includeDetails = true;
             if (args.Length > 2)
             {
@@ -47,16 +50,37 @@ namespace validatequotes
             // Fetch file
             var enclaveInfo = EnclaveInfo.CreateFromFile(this.fileName);
 
+            string endpoint = "https://" + this.attestDnsName;
+
             // Send to service for attestation
-            var maaService = new MaaService(this.attestDnsName);
-            var serviceJwtToken = await maaService.AttestOpenEnclaveAsync(enclaveInfo.GetMaaBody());
+            var options = new AttestationClientOptions(tokenOptions: new AttestationTokenValidationOptions
+            {
+                ExpectedIssuer = endpoint,
+                ValidateIssuer = true,
+            });
+            options.TokenOptions.TokenValidated += (args) =>
+            {
+                // Analyze results
+                Logger.WriteBanner("IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS");
+                args.IsValid = JwtValidationHelper.ValidateMaaJwt(attestDnsName, args.Token, args.Signer, this.includeDetails);
+                return Task.CompletedTask;
+            };
+
+            var maaService = new AttestationClient(new Uri(endpoint), new DefaultAzureCredential(), options);
+
+            BinaryData openEnclaveReport = BinaryData.FromBytes(HexHelper.ConvertHexToByteArray(enclaveInfo.QuoteHex));
+
+            BinaryData runtimeData = BinaryData.FromBytes(HexHelper.ConvertHexToByteArray(enclaveInfo.EnclaveHeldDataHex));
+
+            var serviceResponse = await maaService.AttestOpenEnclaveAsync(new AttestationRequest
+            {
+                Evidence = openEnclaveReport,
+                RuntimeData = new AttestationData(runtimeData, false),
+            });
 
             // Analyze results
-            Logger.WriteBanner("VALIDATING MAA JWT TOKEN - BASICS");
-            JwtValidationHelper.ValidateMaaJwt(attestDnsName, serviceJwtToken, this.includeDetails);
-
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - CLAIMS MATCH CLIENT ENCLAVE INFO");
-            enclaveInfo.CompareToMaaServiceJwtToken(serviceJwtToken, this.includeDetails);
+            enclaveInfo.CompareToMaaServiceJwtToken(serviceResponse.Value, this.includeDetails);
 
             Logger.WriteLine("\n\n");
         }

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using validatequotes.Helpers;
+using Azure.Security.Attestation;
+using Azure.Identity;
+using Azure.Core;
 
 namespace validatequotes
 {
     public class Program
     {
-        private string fileName;
-        private string attestDnsName;
-        private bool includeDetails;
+        private readonly string fileName;
+        private readonly string attestDnsName;
+        private readonly bool includeDetails;
 
         public static void Main(string[] args)
         {
@@ -25,7 +26,7 @@ namespace validatequotes
             this.includeDetails = true;
             if (args.Length > 2)
             {
-                bool.TryParse(args[2], out this.includeDetails);
+                _ = bool.TryParse(args[2], out this.includeDetails);
             }
 
             if (args.Length < 3)
@@ -46,19 +47,47 @@ namespace validatequotes
         public async Task RunAsync()
         {
             // Fetch file
-            var enclaveInfo = EnclaveInfo.CreateFromFile(this.fileName);
+            var enclaveInfo = await EnclaveInfo.CreateFromFileAsync(this.fileName);
 
             // Send to service for attestation
-            var maaService = new MaaService(this.attestDnsName);
-            var serviceResponse = await maaService.AttestOpenEnclaveAsync(enclaveInfo.GetMaaBody());
-            var serviceJwtToken = JObject.Parse(serviceResponse)["token"].ToString();
 
-            // Analyze results
-            Logger.WriteBanner("VALIDATING MAA JWT TOKEN - BASICS");
-            JwtValidationHelper.ValidateMaaJwt(attestDnsName, serviceJwtToken, this.includeDetails);
+            string endpoint = "https://" + this.attestDnsName;
+
+            // Send to service for attestation
+            var options = new AttestationClientOptions(tokenOptions: new AttestationTokenValidationOptions
+                {
+                    ExpectedIssuer = endpoint,
+                    ValidateIssuer = true,
+                }
+            );
+
+            options.TokenOptions.TokenValidated +=  (args) =>
+            {
+                // Analyze results
+                Logger.WriteBanner("IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS");
+                JwtValidationHelper.ValidateMaaJwt(attestDnsName, args.Token, args.Signer, this.includeDetails);
+                args.IsValid = true;
+                return Task.CompletedTask;
+            };
+
+            var maaService = new AttestationClient(new Uri(endpoint), new DefaultAzureCredential(), options);
+
+            BinaryData openEnclaveReport = BinaryData.FromBytes(HexHelper.ConvertHexToByteArray(enclaveInfo.QuoteHex));
+
+            BinaryData runtimeData = BinaryData.FromBytes(HexHelper.ConvertHexToByteArray(enclaveInfo.EnclaveHeldDataHex));
+
+            var serviceResponse = await maaService.AttestOpenEnclaveAsync(
+                new AttestationRequest
+                {
+                    Evidence = openEnclaveReport,
+                    RuntimeData = new AttestationData( runtimeData, false),
+                });
+            var serviceJwtToken = serviceResponse.Token.ToString();
+            
+
 
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO");
-            enclaveInfo.CompareToMaaServiceJwtToken(serviceJwtToken, this.includeDetails);
+            enclaveInfo.CompareToMaaServiceJwtToken(serviceResponse.Value, this.includeDetails);
         }
     }
 }
