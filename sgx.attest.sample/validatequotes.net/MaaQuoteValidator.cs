@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace validatequotes
 {
@@ -8,17 +9,13 @@ namespace validatequotes
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IMetadataVerifier
     {
-        bool VerifyQuoteExtensionInCertificate(
+        bool VerifyQuoteInCertificate(
             [MarshalAs(UnmanagedType.LPStr)]string base64encodedCertificate);
-        bool VerifyQuoteInExtension();
-        bool VerifyCertificateKeyMatchesHash();
 
         uint SecurityVersion();
         void ProductId(ref int productIdSize, ref IntPtr productId);
         void UniqueId(ref int uniqueIdSize, ref IntPtr uniqueId);
         void SignerId(ref int signerIdSize, ref IntPtr signerId);
-        void ReportData(ref int reportDataSize, ref IntPtr reportData);
-        void PublicKeyHash(ref int publicKeyHashSize, ref IntPtr publicKeyHash);
     }
 
     public class VerifyMetadataCertificates
@@ -44,29 +41,36 @@ namespace validatequotes
             VerifyMetadataCertificates.GetMetadataCertificateVerifier(out certificateVerifier);
             bool embeddedQuoteLocated = false;
 
+            bool foundMaaQuoteInCertificate = false;
+            X509Certificate2 maaCertificate = new X509Certificate2(Convert.FromBase64String(x5c));
+            foreach (var extension in maaCertificate.Extensions)
+            {
+                if (extension.Oid.Value == "1.3.6.1.4.1.311.105.1")
+                {
+                    foundMaaQuoteInCertificate = true;
+                    break;
+                }
+            }
+
+            if (!foundMaaQuoteInCertificate)
+            {
+                Logger.WriteLine($"Could not find Attestation Quote Extension in certificate: {maaCertificate.Subject}");
+                return;
+            }
             try
             {
-                if (certificateVerifier.VerifyQuoteExtensionInCertificate(x5c))
+                if (certificateVerifier.VerifyQuoteInCertificate(x5c))
                 {
                     embeddedQuoteLocated = true;
                 }
             }
             catch (Exception x)
             {
-                //Logger.WriteLine($"Exception thrown locating quote in certificate: {x.ToString()}");
+                Logger.WriteLine($"Exception thrown locating quote in certificate: {x.Message}");
             }
-
-            Logger.WriteLine($"Embedded quote found in certificate: {embeddedQuoteLocated}");
             if (!embeddedQuoteLocated)
             {
-                return;
-            }
-
-            var quoteVerifiedByIntel = certificateVerifier.VerifyQuoteInExtension();
-            Logger.WriteLine($"Quote verified by Intel            : {quoteVerifiedByIntel}");
-            if (!quoteVerifiedByIntel)
-            {
-                return;
+                Logger.WriteLine($"Could not find quote in attestation certificate!");
             }
 
             if (includeDetails)
@@ -99,28 +103,7 @@ namespace validatequotes
 
                     Logger.WriteLine(37, 64, "    Enclave ID                     : ", BitConverter.ToString(uniqueId).Replace("-", ""));
                 }
-
-                {
-                    int reportDataSize = 0;
-                    IntPtr reportDataRaw = IntPtr.Zero;
-                    certificateVerifier.ReportData(ref reportDataSize, ref reportDataRaw);
-                    byte[] reportData = ToByteArray(reportDataSize, reportDataRaw);
-
-                    Logger.WriteLine(37, 64, "    Report data                    : ", BitConverter.ToString(reportData).Replace("-", ""));
-                }
-
-                {
-                    int publicKeyHashSize = 0;
-                    IntPtr publicKeyHashRaw = IntPtr.Zero;
-                    certificateVerifier.PublicKeyHash(ref publicKeyHashSize, ref publicKeyHashRaw);
-                    byte[] publicKeyHash = ToByteArray(publicKeyHashSize, publicKeyHashRaw);
-
-                    Logger.WriteLine(37, 64, "    Public key hash                : ", BitConverter.ToString(publicKeyHash).Replace("-", ""));
-                }
             }
-
-            var signingCertKeyMatchesHash = certificateVerifier.VerifyCertificateKeyMatchesHash();
-            Logger.WriteLine($"Signing cert key matches hash      : {signingCertKeyMatchesHash}");
         }
     }
 }

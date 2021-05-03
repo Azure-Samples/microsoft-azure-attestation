@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Azure.Security.Attestation;
+using System;
+using System.Linq;
 
 namespace validatequotes
 {
@@ -28,10 +30,8 @@ namespace validatequotes
             return maaBody;
         }
 
-        public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
+        public void CompareToMaaServiceJwtToken(AttestationResult attestationResult, bool includeDetails)
         {
-            var jwtBody = JoseHelper.ExtractJosePart(serviceJwtToken, 1);
-
             //if (includeDetails)
             //{
             //    Logger.WriteLine("");
@@ -41,58 +41,54 @@ namespace validatequotes
             //}
 
             var isDebuggable = (Attributes & 1) == 1;
-            var isd = jwtBody["is-debuggable"];
-            var isdpassed = isDebuggable == (bool)isd;
+            var isdpassed = isDebuggable == attestationResult.IsDebuggable;
             Logger.WriteLine($"IsDebuggable match                 : {isdpassed}");
             if (includeDetails)
             {
                 Logger.WriteLine($"    We think   : {isDebuggable}");
-                Logger.WriteLine($"    MAA service: {isd}");
+                Logger.WriteLine($"    MAA service: {attestationResult.IsDebuggable}");
             }
 
-            var mre = jwtBody["sgx-mrenclave"];
-            var mrepassed = MrEnclaveHex.ToLower().Equals((string)mre);
+            var mrepassed = MrEnclaveHex.ToLower().Equals(attestationResult.MrEnclave);
             Logger.WriteLine($"MRENCLAVE match                    : {mrepassed}");
             if (includeDetails)
             {
                 Logger.WriteLine($"    We think   : {MrEnclaveHex.ToLower()}");
-                Logger.WriteLine($"    MAA service: {mre}");
+                Logger.WriteLine($"    MAA service: {attestationResult.MrEnclave}");
             }
 
-            var mrs = jwtBody["sgx-mrsigner"];
-            var mrspassed = MrSignerHex.ToLower().Equals(((string)mrs).ToLower());
+            var mrspassed = MrSignerHex.ToLower().Equals(attestationResult.MrSigner.ToLower());
             Logger.WriteLine($"MRSIGNER match                     : {mrspassed}");
             if (includeDetails)
             {
                 Logger.WriteLine($"    We think   : {MrSignerHex.ToLower()}");
-                Logger.WriteLine($"    MAA service: {mrs}");
+                Logger.WriteLine($"    MAA service: {attestationResult.MrSigner}");
             }
 
-            var pid = jwtBody["product-id"];
-            var pidpassed = BitConverter.ToUInt64(HexHelper.ConvertHexToByteArray(ProductIdHex), 0) == (ulong)pid;
+            var pidpassed = BitConverter.ToUInt64(HexHelper.ConvertHexToByteArray(ProductIdHex), 0) == (ulong)attestationResult.ProductId;
             Logger.WriteLine($"ProductID match                    : {pidpassed}");
             if (includeDetails)
             {
                 Logger.WriteLine($"    We think   : {BitConverter.ToUInt64(HexHelper.ConvertHexToByteArray(ProductIdHex), 0)}");
-                Logger.WriteLine($"    MAA service: {pid}");
+                Logger.WriteLine($"    MAA service: {attestationResult.ProductId}");
             }
 
-            var svn = jwtBody["svn"];
-            var svnPassed = SecurityVersion == (uint)svn;
+            var svnPassed = SecurityVersion == (uint)attestationResult.Svn;
             Logger.WriteLine($"Security Version match             : {svnPassed}");
             if (includeDetails)
             {
                 Logger.WriteLine($"    We think   : {SecurityVersion}");
-                Logger.WriteLine($"    MAA service: {svn}");
+                Logger.WriteLine($"    MAA service: {attestationResult.Svn}");
             }
 
-            var ehd = jwtBody["maa-ehd"];
-            var ehdPassed = HexHelper.ConvertHexToBase64Url(EnclaveHeldDataHex).Equals((string)ehd);
+            var ehdExpected = HexHelper.ConvertHexToByteArray(EnclaveHeldDataHex);
+            var ehdActual = attestationResult.EnclaveHeldData;
+            var ehdPassed = ehdExpected.SequenceEqual(ehdActual.ToArray());
             Logger.WriteLine($"Enclave Held Data match            : {ehdPassed}");
             if (includeDetails)
             {
-                Logger.WriteLine(17, 124, "    We think   : ", EnclaveHeldDataHex);
-                Logger.WriteLine(17, 124, "    MAA service: ", BitConverter.ToString(Base64Url.DecodeBytes(ehd.ToString())).Replace("-",""));
+                Logger.WriteLine(17, 100, "    We think   : ", Base64Url.EncodeBytes(ehdExpected));
+                Logger.WriteLine(17, 100, "    MAA service: ", Base64Url.EncodeBytes(attestationResult.EnclaveHeldData.ToArray()));
             }
 
             Logger.WriteLine("");
