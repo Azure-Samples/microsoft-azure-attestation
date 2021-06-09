@@ -6,7 +6,7 @@ languages:
 products:
   - azure
 description: "Learn how to perform Intel® SGX Attestation using Microsoft Azure Attestation"
---- 
+---
 
 # Sample code for Intel® SGX Attestation using Microsoft Azure Attestation
 
@@ -26,3 +26,4 @@ See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest
 
 See code sample to perform SGX attestation using [Intel SDK](./intel.sdk.attest.sample)
 
+See code sample for [EGo's Microsoft Azure Attestation support](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
