@@ -26,4 +26,8 @@ See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest
 
 See code sample to perform SGX attestation using [Intel SDK](./intel.sdk.attest.sample)
 
-See code sample for [EGo's Microsoft Azure Attestation support](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
+# Code samples from customers leveraging Azure Attestation
+
+- [EGo's code sample using Azure Attestation](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
+- [Azure Attestation integration in SCONE platform](https://github.com/scontain/scone-azure-integration)
+
