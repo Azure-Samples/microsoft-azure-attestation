@@ -22,9 +22,9 @@ The flow is:
 4. Call Azure Attestation for validation
 5. Output validation results
 
-See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest.sample)
+See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest.sample.oe.sdk)
 
-See code sample to perform SGX attestation using [Intel SDK](./intel.sdk.attest.sample)
+See code sample to perform SGX attestation using [Intel SDK](./sgx.attest.sample.intel.sdk)
 
 ## Customer code samples leveraging Azure Attestation
 
