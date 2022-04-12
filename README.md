@@ -26,7 +26,17 @@ See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest
 
 See code sample to perform SGX attestation using [Intel SDK](./sgx.attest.sample.intel.sdk)
 
-## Customer code samples leveraging Azure Attestation
+# Sample code to manage trusted signing certificates for Isolated providers
+
+The [Microsoft Azure Attestation service](https://docs.microsoft.com/en-us/azure/attestation/overview) (MAA) allows users to manage their own attestation provider instance.  Furthermore, MAA enables users to operate their instance in *Isolated* mode.  This means:
+* all updates to attestation policy must be authorized by signing the request with a user managed private key
+* all updates to the set of trusted signing keys must be authorized by signing the request with a user managed private key
+
+The user must manage an X509 certificate for each private key.  Additionally, to share a signed request with the MAA service, the user must create a specific JWT format as defined in the MAA documentation [here](https://docs.microsoft.com/en-us/azure/attestation/author-sign-policy#creating-the-policy-file-in-json-web-signature-format).  The JWT format is described in great detail in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519).
+
+See a code sample to manage trusted signing certificates and keys for Isolated providers [here](./maa.signing.tool.sample)
+
+# Customer code samples leveraging Azure Attestation
 
 - [EGo's code sample using Azure Attestation](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
 - [Azure Attestation integration in SCONE platform](https://github.com/scontain/scone-azure-integration)

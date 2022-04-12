@@ -1,0 +1,11 @@
+version=1.0;
+
+authorizationrules
+{
+[type=="secureBootEnabled", value==true, issuer=="AttestationService"]=>permit();
+};
+
+issuancerules
+{
+=> issue(type="SecurityLevelValue", value=100);
+};

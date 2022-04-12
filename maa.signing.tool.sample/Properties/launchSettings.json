@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "maa.signing.tool": {
+      "commandName": "Project",
+      "commandLineArgs": "signpolicy -p .\\policy\\add.custom.claim.txt -k .\\certs\\sample.signing.cert.encrypted.key -x 12345 -s .\\certs\\sample.signing.cert.encrypted.crt -v"
+    }
+  }
+}
