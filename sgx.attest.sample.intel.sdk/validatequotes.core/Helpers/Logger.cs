@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 
 namespace validatequotes
 {
@@ -28,12 +27,11 @@ namespace validatequotes
 
         public static void WriteBanner(string banner)
         {
-            string separatorLine = new string('*', 120);
+            string separatorLine = new('*', 120);
             WriteLine("");
             WriteLine(separatorLine);
             WriteLine($"*      {banner}");
             WriteLine(separatorLine);
-            WriteLine("");
         }
     }
 }

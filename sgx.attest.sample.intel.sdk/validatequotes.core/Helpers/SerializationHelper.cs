@@ -1,20 +1,20 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace validatequotes
 {
     public class SerializationHelper
     {
-        public static T ReadFromFile<T>(string filePath)
+        public async static Task<T> ReadFromFileAsync<T>(string filePath)
         {
-            ConstructorInfo defaultConstructorInfo = typeof(T).GetConstructor(new Type[] { });
-            T persistedObject = (T) defaultConstructorInfo.Invoke(new object[] { });
+            T persistedObject = default;
 
             try
             {
-                var deserializedObject = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
+                var deserializedObject = await JsonSerializer.DeserializeAsync<T>(new FileStream(filePath, FileMode.Open));
                 if (deserializedObject != null)
                 {
                     persistedObject = deserializedObject;
@@ -28,9 +28,9 @@ namespace validatequotes
             return persistedObject;
         }
 
-        public static void WriteToFile<T>(string fileName, T persistedObject)
+        public async static Task WriteToFileAsync<T>(string fileName, T persistedObject)
         {
-            File.WriteAllText(fileName, JsonConvert.SerializeObject(persistedObject));
+            await File.WriteAllTextAsync(fileName, JsonSerializer.Serialize(persistedObject));
         }
     }
 }
