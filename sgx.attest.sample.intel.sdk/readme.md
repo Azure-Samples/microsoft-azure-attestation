@@ -66,7 +66,7 @@ The verification that the MAA service JWT claims match the initial parsed report
 ### How to Build and Run
 
 ##### 1. Prerequisites/System setup
-1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
+1. Install Ubuntu 18.04 on an [Azure Confidential Computing](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
 2. Install Intel SGX Driver and SGX SDK.
 
 Configure the Intel and Microsoft APT Repositories:
