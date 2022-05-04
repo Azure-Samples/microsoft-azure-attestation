@@ -81,7 +81,12 @@ To set up the pre-requisites to build and run these samples:
 1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
 1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/v0.9.x/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_18.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
 1. Add the command "```. /opt/openenclave/share/openenclave/openenclaverc```" to your ~/.bashrc file.
-1. Install the [.NET CORE SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804) on this VM.
+1. Install the [.NET 5.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/5.0) on this VM.
+    1. `wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb`
+    1. `sudo dpkg -i packages-microsoft-prod.deb`
+    1. `rm packages-microsoft-prod.deb`
+    1. `sudo apt update`
+    1. `sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0`
 
 To build and run the samples:
 1. ```git clone``` this repo to the VM
