@@ -87,10 +87,11 @@ To set up the pre-requisites to build and run these samples:
     1. `rm packages-microsoft-prod.deb`
     1. `sudo apt update`
     1. `sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0`
+1. Reboot the VM.
 
 To build and run the samples:
-1. ```git clone``` this repo to the VM
-1. ```cd``` to the subdirectory containing this sample code
+1. ```git clone https://github.com/Azure-Samples/microsoft-azure-attestation``` to the VM
+1. ```cd sgx.attest.sample.oe.sdk```
 1. To build, run and generate the JSON files do the following:
     1. ```cd genquotes```
     1. ```make build```
