@@ -31,7 +31,7 @@ namespace validatequotes
             //    Logger.WriteLine("");
             //}
 
-            var isDebuggable = (Attributes & 1) == 1;
+            var isDebuggable = (Attributes & 2) != 0; // In SGX, DEBUG flag is equal to 0x0000000000000002ULL
             var isdpassed = isDebuggable == serviceResult.IsDebuggable;
             Logger.WriteLine($"IsDebuggable match                 : {isdpassed}");
             if (includeDetails)
