@@ -152,7 +152,8 @@ int SGX_CDECL main(int argc, char *argv[])
     std::string output_dir("./out/");
     std::string cmd("mkdir -p " + output_dir);
     std::string file(output_dir + std::string(argv[2]));
-    system(cmd.c_str());
+    int result = system(cmd.c_str());
+	printf("\nExecuted command '%s' with the result:%u", cmd.c_str(), result);
     printf("\nStep5: Saving quote to JSON file, cert_key_type = 0x%x, output file name = %s\n", p_cert_data->cert_key_type, file.c_str());
     FILE *fp = fopen(file.c_str(), "w");
     fprintf(fp, "%s\n", "{");
