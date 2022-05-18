@@ -19,24 +19,24 @@ This function performs a custom validation on the input certificate. This valida
 
 ### Install Tools
 #### Optional Setup
-- `[Optional]` This step is needed if Internet Explorer is used for the file downloads **and** `file download` option is disabled there. In Internet Explorer enable the file download in Internet Explorer.
-    - Open Internet Explorer.
-    - Click Tools and then options.
-    - Click on the security tab.
-    - Select the Internet Zone.
-    - Click on the Custom Level Button and then scroll down to Download.
-    - Make sure to enable File download.
-    - Click Apply and Ok
-    - Restart Internet Explorer
+- `[Optional]` This step is needed if Internet Explorer is used for the file downloads **and** the `file download` option is disabled. In Internet Explorer, enable the `file download`:
+    - Open Internet Explorer;
+    - Click Tools and then Options;
+    - Click on the Security tab;
+    - Select the Internet Zone;
+    - Click on the Custom Level Button and then scroll down to Download;
+    - Make sure to enable File download;
+    - Click Apply and Ok;
+    - Restart Internet Explorer.
 
 #### Required Tools
 1. Download and install Git from https://git-scm.com/download/win
 2. Download and install [Visual Studio Build Tools 2019](https://aka.ms/vs/16/release/vs_buildtools.exe)
-3. Download and install latest stabel CMake version [CMake v3.23.1](https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.msi). If the link does not work, see https://cmake.org/download/
+3. Download and install the latest stable CMake version [CMake v3.23.1](https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.msi). If the link does not work, see https://cmake.org/download/
 
 ### Get Sources
 Open Git Bash:
-- `[Optional]` Setup the Git Bash with a new SSH key for the GirHub portal:
+- `[Optional]` Setup the Git Bash with a new SSH key for the GitHub portal:
     - Gegerate New SSH Key: `ssh-keygen -t ed25519 -C "<EMAIL>"`
     - Go through the settings prompt and provide wanted values for the key
     - `eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub`
@@ -46,17 +46,17 @@ Open Git Bash:
 
 - Clone the repo
 ```
-git clone  --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
+git clone --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
 ```
 
 Or in GitBash or PowerShell:
 
 ```
-git clone  --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
+git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
 ```
 
-### Set-up Environment and Run the Tool
-- In PowerShell, change directory
+### Set up Environment and Run the Tool
+- In PowerShell, change the directory:
 ```
 cd microsoft-azure-attestation\maa.jwt.verifier
 ```
@@ -65,7 +65,7 @@ cd microsoft-azure-attestation\maa.jwt.verifier
 ```
 .\win_setup_and_build.ps1
 ```
-> These steps include installation of the dependencies (nuget, vkpkg packages), creating the project via CMake, and building it.
+> These steps include installing the dependencies (nuget, vkpkg packages), creating the project via CMake, and building it.
 > Note that the intial execution of the script takes several minutes because it downloads and builds the dependencies.
 
 - Get your MAA JWT for verification to the system.
@@ -76,7 +76,7 @@ cd <PATH-TO-EXE>
 .\jwt-verifier.exe <PATH-TO-JWT>\jwt.txt
 ```
 
-The tool suceeded if returned:
+The tool succeeded if returned:
 ```
 ---     SUCCESS - Verified attestation certificate quote
 ```
@@ -107,7 +107,7 @@ Or
 git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
 ```
 
-### Set-up Environment and Run the Tool
+### Set up Environment and Run the Tool
 - Change directory
 ```
 cd microsoft-azure-attestation/maa.jwt.verifier
