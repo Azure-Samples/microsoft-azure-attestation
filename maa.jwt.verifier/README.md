@@ -1,10 +1,10 @@
 ## About
 
-JWT Verifier takes advantage of the Open Enclave SDK API call ['oe_verify_attestation_certificate'](https://openenclave.io/apidocs/v0.17/enclave_8h_a3b75c5638360adca181a0d945b45ad86.html#a3b75c5638360adca181a0d945b45ad86), see also https://openenclave.io/apidocs/v0.17/index.html .
+JWT Verifier takes advantage of the Open Enclave SDK API call [oe_verify_attestation_certificate](https://openenclave.io/apidocs/v0.17/enclave_8h_a3b75c5638360adca181a0d945b45ad86.html#a3b75c5638360adca181a0d945b45ad86), see also https://openenclave.io/apidocs/v0.17/index.html .
 
 This function perform a custom validation on the input certificate. This validation includes extracting an attestation evidence extension from the certificate before validating this evidence.
 
-`jwt-verifier' builds and runs on Windows and Ubuntu Linux. The tool performs following steps:
+`jwt-verifier` builds and runs on Windows and Ubuntu Linux. The tool performs following steps:
 - [ ] Parses MAA JWT;
 - [ ] Sends request to MAA to get certficates;
 - [ ] Deserialize JSON Web Keys and finds x.509 certificates for the key;
