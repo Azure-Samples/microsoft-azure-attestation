@@ -76,10 +76,9 @@ namespace jwtverifier {
             return false;
         }
 
-        // Magic number 80 is a constance used within OpenSSL library.
-        // See: https://git.happyzh.com/github/openssl/-/blob/master/crypto/asn1/a_object.c#L187
-        const int sz = 80;
-        char obj_buffer[sz];
+        // 80 is a constant used by OpenSSL Crypto (see https://github.com/openssl/openssl/blob/master/crypto/asn1/a_object.c)
+	const int sz = 80;
+	char obj_buffer[sz];
         memset(obj_buffer, 0, sz);
         BIO_read(output_bio.get(), obj_buffer, sz - 1);
         std::string ext_string(obj_buffer);
