@@ -46,7 +46,7 @@ namespace jwtverifier {
     }
 
     std::string Jwt::get_jku() const { return jku_; }
-    std::string Jwt::get_tenant() const { return (tenant_.size() > 24) ? tenant_.substr(0, 24) : tenant_; }
+    std::string Jwt::get_tenant() const { return tenant_; }
     std::string Jwt::get_kid() const { return kid_; }
 
     std::string Jwt::parse_dns() const {
