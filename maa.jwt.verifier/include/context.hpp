@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-namespace mvj {
+namespace jwtverifier {
 
     class Context {
         bool is_verbose_;

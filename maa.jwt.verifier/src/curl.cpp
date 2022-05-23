@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace mvj {
+namespace jwtverifier {
     
     struct MemoryChunk {
         char* memory;

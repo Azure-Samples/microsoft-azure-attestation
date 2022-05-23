@@ -5,7 +5,7 @@
 #include <chrono>
 #include <unordered_map>
 
-namespace mvj {
+namespace jwtverifier {
 
     typedef void (Context::* ContextMemFn)(const std::string&);
 

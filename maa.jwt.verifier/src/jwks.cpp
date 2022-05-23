@@ -4,7 +4,7 @@
 #include <context.hpp>
 #include <regex>
 
-namespace mvj {
+namespace jwtverifier {
 
     Jwk::Jwk(const std::string& str) : kid(), kty(), x5c() {
         kid = json::get_value(str, "kid");
@@ -14,7 +14,7 @@ namespace mvj {
 
     Jwks::Jwks(const std::string& str) {
         std::vector<std::string> raw_keys;
-        mvj::strings::split(str, "\\}[ \n\r]*,", raw_keys);
+        jwtverifier::strings::split(str, "\\}[ \n\r]*,", raw_keys);
         for (auto raw_key : raw_keys) {
             Jwk key(raw_key);
             keys_[key.kid] = key;

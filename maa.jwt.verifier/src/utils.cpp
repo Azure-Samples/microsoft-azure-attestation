@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace mvj::json {
+namespace jwtverifier::json {
 
     std::string get_value(const std::string& str, const std::string& key) {
         if (str.empty()) {
@@ -28,12 +28,12 @@ namespace mvj::json {
         std::string values = (std::regex_search(str.begin(), str.end(), match, rgx)) ? std::string(match[1]) : "";
         strings::remove_char(values, '"');
         std::vector<std::string> result;
-        mvj::strings::split(values, ",", result);
+        jwtverifier::strings::split(values, ",", result);
         return result;
     }
 }
 
-namespace mvj::strings {
+namespace jwtverifier::strings {
 
     void split(const std::string& str, const std::string& delim, std::vector<std::string>& result) {
         std::regex regex(delim);
@@ -54,7 +54,7 @@ namespace mvj::strings {
 
 }
 
-namespace mvj::file {
+namespace jwtverifier::file {
     bool get_lines(const std::string& filename, std::vector<std::string>& out) {
         if (filename.empty()) {
             Context::log("Faile name is empty, exiting");

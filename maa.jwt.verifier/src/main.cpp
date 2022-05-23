@@ -17,7 +17,7 @@
 #include <openenclave/attestation/verifier.h>
 #include <openenclave/attestation/sgx/evidence.h>
 
-using namespace mvj;
+using namespace jwtverifier;
 
 uint32_t    _id_version;
 uint64_t    _attributes;

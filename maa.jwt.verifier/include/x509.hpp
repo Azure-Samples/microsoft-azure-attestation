@@ -7,7 +7,7 @@
 #include <openssl/bio.h>
 #include <openssl/x509.h>
 
-namespace mvj {
+namespace jwtverifier {
 
     using BIO_ptr = std::unique_ptr<BIO, decltype(&BIO_free)>;
     using X509_ptr = std::unique_ptr<X509, decltype(&X509_free)>;

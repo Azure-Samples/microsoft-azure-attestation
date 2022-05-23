@@ -3,7 +3,7 @@
 #include <string>
 #include <curl/curl.h>
 
-namespace mvj {
+namespace jwtverifier {
 
     class Curl {
         CURL* curl_;

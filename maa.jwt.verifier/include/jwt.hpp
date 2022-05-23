@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mvj {
+namespace jwtverifier {
 
     class Jwt {
         std::string encoded_token_;

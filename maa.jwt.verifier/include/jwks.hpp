@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace mvj {
+namespace jwtverifier {
 
     // Jwk struct wraps parameters of a JSON Web Key (JWK), received from MAA service.
     // JWK is a JavaScript Object Notation (JSON) data structure 

@@ -5,7 +5,7 @@
 #include <base64.hpp>
 #include <regex>
 
-namespace mvj {
+namespace jwtverifier {
 
     Jwt::Jwt() {}
         

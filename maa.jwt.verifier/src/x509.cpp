@@ -12,7 +12,7 @@
 
 #include <context.hpp>
 
-namespace mvj {
+namespace jwtverifier {
 
     void X509QuoteExt::init() {
         // Adds all algorithms to the table (digests and ciphers).
