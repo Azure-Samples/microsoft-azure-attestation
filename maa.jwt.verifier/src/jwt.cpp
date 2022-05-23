@@ -30,8 +30,16 @@ namespace jwtverifier {
             attest_dns_ = parse_dns();
             tenant_ = parse_tenant();
         }
-        catch (const char* ex) {
-            Context::log("Failed to deserialize JWT, exception: " + std::string(ex));
+        catch (const std::exception& ex) {
+            Context::log("Failed to deserialize JWT, exception: " + std::string(ex.what()));
+            return false;
+        }
+        catch (const std::string& ex) {
+            Context::log("Failed to deserialize JWT, exception: " + ex);
+            return false;
+        }
+        catch (...) {
+            Context::log("Failed to deserialize JWT");
             return false;
         }
         return true;
