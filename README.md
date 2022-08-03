@@ -40,17 +40,5 @@ See a code sample to manage trusted signing certificates and keys for Isolated p
 
 - [EGo's code sample using Azure Attestation](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
 - [Azure Attestation integration in SCONE platform](https://github.com/scontain/scone-azure-integration)
+- [Azure Attestation integration in Occlum](https://github.com/occlum/occlum/tree/master/demos/remote_attestation/azure_attestation)
 
-- [Sample code for Occlum Remote Attestation to generate Microsoft Azure Attestation json file](https://github.com/occlum/occlum/tree/master/demos/remote_attestation/maa)
-
-Please refer to the [Occlum MAA demo README page](https://github.com/occlum/occlum/blob/master/demos/remote_attestation/maa/README.md#prerequisites) on how to run the demo.
-MAA attestation workflow includes the following steps:
-1. Build an SGX enclave
-2. Launch an SGX enclave and get the SGX quote
-3. Persist SGX quote and Enclave Held Data (EHD) to JSON file
-4. Call Azure Attestation for validation
-5. Output validation results
-
-At the time the README is updated, the Occlum Demo executes the first three steps. To perform the attestation of the Occlum output, one needs to retrieve sources from [MAA Intel SGX SDK Sample](https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample.intel.sdk/validatequotes.core) and perform the validation steps using Occlum's output.
-
-Instructions on how to build and run `sgx.attest.sample.intel.sdk/validatequotes.core/` are located in https://github.com/Azure-Samples/microsoft-azure-attestation/tree/master/sgx.attest.sample.intel.sdk#build-and-run.
