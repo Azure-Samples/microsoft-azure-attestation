@@ -85,12 +85,8 @@ namespace validatequotes
                 });
             var serviceJwtToken = serviceResponse.Token.ToString();
 
-            Console.WriteLine(">>>>>>>>>>>TOKEN:");
-
-            Console.WriteLine(Encoding.Default.GetString(serviceResponse.Token.TokenBodyBytes.ToArray()));
-            Console.WriteLine("<<<<<<<<<<<<<");
-
-            //await File.WriteAllTextAsync("maa-response.txt", serviceJwtToken);
+            Logger.WriteBanner("SAVING JWT TOKEN as `maa-jwt-token.txt`");
+            await File.WriteAllTextAsync("maa-jwt-token.txt", serviceResponse.Token.Serialize());
 
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO");
             enclaveInfo.CompareToMaaServiceJwtToken(serviceResponse.Value, this.includeDetails);
