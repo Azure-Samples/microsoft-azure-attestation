@@ -66,8 +66,8 @@ The verification that the MAA service JWT claims match the initial parsed report
 ## How to Build and Run
 
 ## Prerequisites/System setup
-1. Install Ubuntu 18.04 on an [Azure Confidential Computing](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
-2. Install Intel SGX Driver and SGX SDK. See https://download.01.org/intel-sgx/sgx-dcap/1.10/linux/distro/ubuntu18.04-server/ for the latest driver and SDK files.
+1. Create an [Azure Confidential Computing](https://azure.microsoft.com/en-us/solutions/confidential-compute/) Ubuntu 18.04 VM.
+2. Install Intel SGX Driver and SGX SDK. See https://download.01.org/intel-sgx/sgx-dcap (for example, https://download.01.org/intel-sgx/sgx-dcap/1.16/linux/distro/ubuntu18.04-server/) for the latest driver and SDK files.
 
 Configure the Intel and Microsoft APT Repositories:
 ```
@@ -81,7 +81,7 @@ Install Intel SGX DCAP Driver:
 ```
 sudo apt -y update
 sudo apt install -y dkms
-wget https://download.01.org/intel-sgx/sgx-dcap/1.10/linux/distro/ubuntu18.04-server/sgx_linux_x64_driver_1.41.bin -O sgx_linux_x64_driver.bin
+wget https://download.01.org/intel-sgx/sgx-dcap/1.16/linux/distro/ubuntu18.04-server/sgx_linux_x64_driver_1.41.bin -O sgx_linux_x64_driver.bin
 sudo chmod a+x sgx_linux_x64_driver.bin
 sudo ./sgx_linux_x64_driver.bin
 ```
@@ -89,7 +89,7 @@ For more information see: https://github.com/intel/linux-sgx#build-and-install-t
 
 Install Intel SGX SDK: 
 ```
-wget https://download.01.org/intel-sgx/sgx-dcap/1.10/linux/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.13.100.4.bin -O sgx_linux_x64_sdk.bin
+wget https://download.01.org/intel-sgx/sgx-dcap/1.16/linux/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.19.100.3.bin -O sgx_linux_x64_sdk.bin
 sudo chmod a+x sgx_linux_x64_sdk.bin
 sudo ./sgx_linux_x64_sdk.bin
 ```
@@ -107,30 +107,176 @@ sudo apt install -y libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-encl
 ```
 
 3. Install the [.NET 5.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/5.0) on this VM.
-    1. `wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb`
-    1. `sudo dpkg -i packages-microsoft-prod.deb`
-    1. `rm packages-microsoft-prod.deb`
-    1. `sudo apt update`
-    1. `sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0`
+
+```
+wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo apt update
+sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0
+```
 
 4. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
 
+```
+sudo reboot now
+```
+
 ## Build and Run
-1. ```git clone https://github.com/Azure-Samples/microsoft-azure-attestation``` to the VM
-1. ```cd sgx.attest.sample.intel.sdk```
-1. To build, run and generate the JSON files do the following:
-    1. ```cd genquotes```
-    1. ```sudo ./runall.sh```
-    1. This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```./genquotes/out``` directory.
-1. To build, run and validate the JSON files with the MAA service do the following:
-    1. ```cd validatequotes.core```
-    1. ```./runall.sh```
-    1. This builds and runs the validation application against the four different JSON files produced earlier.
-    1. The runall.sh script assumes you have access to the `sharedcus.cus.attest.azure.net` attestation provider.  If you don't, edit the [runall.sh](./validatequotes.core/runall.sh#L5) script to reference your attestation provider.  
+1. Clone MAA samples repo to the VM:
+
+```
+git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
+```
+
+OR
+
+```
+git clone --recursive --branch <branch-name> https://github.com/Azure-Samples/microsoft-azure-attestation.git
+```
+
+OR
+
+```
+git clone --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
+
+```
+
+2. Change the directory:
+
+```
+cd ./microsoft-azure-attestation/sgx.attest.sample.intel.sdk
+```
+
+3. Build, run and generate the JSON files do the following:
+
+```
+cd genquotes
+```
+
+```
+sudo ./runall.sh
+```
+
+This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```./genquotes/out``` directory.
+
+5. Build, run and validate the JSON files with the MAA service do the following:
+
+```
+cd validatequotes.core
+```
+
+```
+./runall.sh
+```
+
+These steps build and run the validation application against the four different JSON files produced earlier.
 
 ##### The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
 * *enclave.info.release.json* - debugging disabled
 * *enclave.info.securityversion.json* - security version set to 8888
 * *enclave.info.prodid.json* - product id set to 9999
+
+## Example Output for ./runall.sh
+Here is an example of what the output of ```./runall.sh``` should look like:
+
+```
+[20:36:32.692] : 
+[20:36:32.712] : ************************************************************************************************************************
+[20:36:32.712] : *      PARAMETERS FOR THIS RUN
+[20:36:32.712] : ************************************************************************************************************************
+[20:36:32.712] : Validating filename                : ../genquotes/out/enclave.info.debug.json
+[20:36:32.712] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[20:36:32.712] : Including details                  : False
+[20:36:33.096] : 
+[20:36:33.096] : ************************************************************************************************************************
+[20:36:33.096] : *      IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS
+[20:36:33.096] : ************************************************************************************************************************
+[20:36:33.108] : JWT issuer claim validation        : True
+[20:36:33.108] : JWT signing cert issuer validation : True
+[20:36:33.509] : 
+[20:36:33.509] : ************************************************************************************************************************
+[20:36:33.509] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[20:36:33.509] : ************************************************************************************************************************
+[20:36:33.509] : IsDebuggable match                 : True
+[20:36:33.509] : MRENCLAVE match                    : True
+[20:36:33.509] : MRSIGNER match                     : True
+[20:36:33.509] : ProductID match                    : True
+[20:36:33.510] : Security Version match             : True
+[20:36:33.510] : Enclave Held Data match            : True
+[20:36:33.510] : 
+[20:36:34.607] : 
+[20:36:34.644] : ************************************************************************************************************************
+[20:36:34.644] : *      PARAMETERS FOR THIS RUN
+[20:36:34.644] : ************************************************************************************************************************
+[20:36:34.644] : Validating filename                : ../genquotes/out/enclave.info.release.json
+[20:36:34.644] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[20:36:34.644] : Including details                  : False
+[20:36:35.127] : 
+[20:36:35.127] : ************************************************************************************************************************
+[20:36:35.127] : *      IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS
+[20:36:35.127] : ************************************************************************************************************************
+[20:36:35.137] : JWT issuer claim validation        : True
+[20:36:35.137] : JWT signing cert issuer validation : True
+[20:36:35.147] : 
+[20:36:35.147] : ************************************************************************************************************************
+[20:36:35.147] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[20:36:35.147] : ************************************************************************************************************************
+[20:36:35.148] : IsDebuggable match                 : True
+[20:36:35.148] : MRENCLAVE match                    : True
+[20:36:35.148] : MRSIGNER match                     : True
+[20:36:35.148] : ProductID match                    : True
+[20:36:35.148] : Security Version match             : True
+[20:36:35.149] : Enclave Held Data match            : True
+[20:36:35.149] : 
+[20:36:36.283] : 
+[20:36:36.301] : ************************************************************************************************************************
+[20:36:36.301] : *      PARAMETERS FOR THIS RUN
+[20:36:36.301] : ************************************************************************************************************************
+[20:36:36.301] : Validating filename                : ../genquotes/out/enclave.info.prodid.json
+[20:36:36.301] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[20:36:36.301] : Including details                  : False
+[20:36:36.681] : 
+[20:36:36.681] : ************************************************************************************************************************
+[20:36:36.681] : *      IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS
+[20:36:36.681] : ************************************************************************************************************************
+[20:36:36.691] : JWT issuer claim validation        : True
+[20:36:36.691] : JWT signing cert issuer validation : True
+[20:36:36.701] : 
+[20:36:36.701] : ************************************************************************************************************************
+[20:36:36.701] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[20:36:36.701] : ************************************************************************************************************************
+[20:36:36.702] : IsDebuggable match                 : True
+[20:36:36.702] : MRENCLAVE match                    : True
+[20:36:36.702] : MRSIGNER match                     : True
+[20:36:36.702] : ProductID match                    : True
+[20:36:36.702] : Security Version match             : True
+[20:36:36.703] : Enclave Held Data match            : True
+[20:36:36.703] : 
+[20:36:37.836] : 
+[20:36:37.889] : ************************************************************************************************************************
+[20:36:37.889] : *      PARAMETERS FOR THIS RUN
+[20:36:37.889] : ************************************************************************************************************************
+[20:36:37.889] : Validating filename                : ../genquotes/out/enclave.info.securityversion.json
+[20:36:37.889] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[20:36:37.889] : Including details                  : False
+[20:36:38.349] : 
+[20:36:38.350] : ************************************************************************************************************************
+[20:36:38.350] : *      IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS
+[20:36:38.350] : ************************************************************************************************************************
+[20:36:38.360] : JWT issuer claim validation        : True
+[20:36:38.360] : JWT signing cert issuer validation : True
+[20:36:38.371] : 
+[20:36:38.371] : ************************************************************************************************************************
+[20:36:38.371] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[20:36:38.371] : ************************************************************************************************************************
+[20:36:38.372] : IsDebuggable match                 : True
+[20:36:38.372] : MRENCLAVE match                    : True
+[20:36:38.372] : MRSIGNER match                     : True
+[20:36:38.372] : ProductID match                    : True
+[20:36:38.372] : Security Version match             : True
+[20:36:38.373] : Enclave Held Data match            : True
+[20:36:38.373] : 
+```
 
