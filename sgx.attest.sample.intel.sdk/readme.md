@@ -126,13 +126,20 @@ sudo reboot now
 1. Clone MAA samples repo to the VM:
 
 ```
-git clone --recursive --branch <branch-name> https://github.com/Azure-Samples/microsoft-azure-attestation.git
+git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
 ```
 
 OR
 
 ```
 git clone --recursive --branch <branch-name> https://github.com/Azure-Samples/microsoft-azure-attestation.git
+```
+
+OR
+
+```
+git clone --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
+
 ```
 
 2. Change the directory:
