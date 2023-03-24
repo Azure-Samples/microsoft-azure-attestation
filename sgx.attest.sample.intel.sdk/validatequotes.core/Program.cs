@@ -5,6 +5,7 @@ using validatequotes.Helpers;
 using Azure.Security.Attestation;
 using Azure.Identity;
 using Azure.Core;
+using System.Text;
 
 namespace validatequotes
 {
@@ -22,7 +23,7 @@ namespace validatequotes
         public Program(string[] args)
         {
             this.fileName = args.Length > 0 ? args[0] : (Directory.GetCurrentDirectory().Contains("bin", StringComparison.InvariantCultureIgnoreCase) ? "../../../../genquotes/quotes/enclave.info.release.json" : "../genquotes/quotes/enclave.info.release.json");
-            this.attestDnsName = args.Length > 1 ? args[1] : "maavaltest.uks.test.attest.azure.net";
+            this.attestDnsName = args.Length > 1 ? args[1] : "sharedcus.cus.attest.azure.net";
             this.includeDetails = true;
             if (args.Length > 2)
             {
@@ -84,7 +85,12 @@ namespace validatequotes
                 });
             var serviceJwtToken = serviceResponse.Token.ToString();
 
-            await File.WriteAllTextAsync("maa-response.txt", serviceJwtToken);
+            Console.WriteLine(">>>>>>>>>>>TOKEN:");
+
+            Console.WriteLine(Encoding.Default.GetString(serviceResponse.Token.TokenBodyBytes.ToArray()));
+            Console.WriteLine("<<<<<<<<<<<<<");
+
+            //await File.WriteAllTextAsync("maa-response.txt", serviceJwtToken);
 
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO");
             enclaveInfo.CompareToMaaServiceJwtToken(serviceResponse.Value, this.includeDetails);
