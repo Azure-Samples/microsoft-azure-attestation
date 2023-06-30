@@ -131,6 +131,7 @@ sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -
 ```
 sudo apt-get install build-essential
 sudo apt-get install libssl-dev
+sudo apt install libsecret-1-dev
 ```
 
 5. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
