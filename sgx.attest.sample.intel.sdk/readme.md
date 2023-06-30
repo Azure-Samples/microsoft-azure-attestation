@@ -115,8 +115,13 @@ rm packages-microsoft-prod.deb
 sudo apt update
 sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0
 ```
+4. Install pre-requisites
+```
+sudo apt-get install build-essential
+sudo apt-get install libssl-dev
+```
 
-4. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
+5. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
 
 ```
 sudo reboot now
