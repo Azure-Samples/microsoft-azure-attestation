@@ -94,6 +94,18 @@ sudo chmod a+x sgx_linux_x64_sdk.bin
 sudo ./sgx_linux_x64_sdk.bin
 ```
 
+If you have installed Intel SGX DCAP Quote Provider Library (QPL), you have to purge it:
+```
+apt purge libsgx-dcap-default-qpl
+```
+
+Install Azure DCAP Client:
+```
+echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/20.04/prod focal main" | sudo tee /etc/apt/sources.list.d/msprod.listdeb [arch=amd64] https://packages.microsoft.com/ubuntu/20.04/prod focal main
+sudo apt update
+sudo apt install az-dcap-client
+```
+
 Specify a directory to install the Intel SGX SDK. For example, `/opt/intel`
 If the SDK is installed into /opt/intel, run the following command:
 ```
