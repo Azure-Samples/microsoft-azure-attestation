@@ -134,7 +134,12 @@ sudo apt-get install libssl-dev
 sudo apt install libsecret-1-dev
 ```
 
-5. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
+5. Install Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt#option-1-install-with-one-command)
+```
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+7. Reboot the VM. **This is required to complete the SGX DCAP driver installation.**
 
 ```
 sudo reboot now
@@ -178,10 +183,14 @@ sudo ./runall.sh
 
 This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```./genquotes/out``` directory.
 
-5. Build, run and validate the JSON files with the MAA service do the following:
+5. Perform Azure login, build, run and validate the JSON files with the MAA service do the following:
 
 ```
 cd validatequotes.core
+```
+
+```
+az login
 ```
 
 ```
