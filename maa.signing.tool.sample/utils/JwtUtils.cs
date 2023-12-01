@@ -21,11 +21,11 @@ namespace maa.signing.tool.utils
             return GenerateSingleClaimJsonWebToken("AttestationPolicy", policy, signingKey, signingCert);
         }
 
-        public static string GenerateSignedCertificateJsonWebToken(X509Certificate2 embeddedCertificate, RSA signingKey, X509Certificate2 signingCert)
+        public static string GenerateSignedCertificateJsonWebToken(X509Certificate2 embeddedCertificate, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
         {
             var exportedCert = embeddedCertificate.Export(X509ContentType.Cert);
             string jwkToAdd = $"{{\"kty\":\"RSA\", \"x5c\":[\"{System.Convert.ToBase64String(exportedCert)}\"]}}";
-            return GenerateSingleClaimJsonWebToken("maa-policyCertificate", jwkToAdd, signingKey, signingCert);
+            return GenerateSingleClaimJsonWebToken(useMaaPreviewApiVersion ? "maa-policyCertificate" : "policyCertificate", jwkToAdd, signingKey, signingCert);
         }
 
         public static string FormatJwt(string raw)

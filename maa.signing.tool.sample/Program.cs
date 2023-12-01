@@ -64,7 +64,7 @@ namespace maa.signing.tool
             var cert = new X509Certificate2(options.CertFileName);
 
             // Sign certificate
-            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert);
+            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert, options.UseMaaPreviewApiVersion);
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(certJwt)}\n");
 
             // Report JWT
