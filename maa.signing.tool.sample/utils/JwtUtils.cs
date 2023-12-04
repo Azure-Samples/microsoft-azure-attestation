@@ -7,7 +7,7 @@ namespace maa.signing.tool.utils
 {
     public class JwtUtils
     {
-        public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert)
+        public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
         {
 
             if (!policy.StartsWith('"'))
@@ -18,6 +18,13 @@ namespace maa.signing.tool.utils
                 policy = "\"" + policy + "\"";
                 Tracer.TraceVerbose($"Updated policy to be signed = \n{policy}\n");
             }
+
+            if (!useMaaPreviewApiVersion)
+            {
+                policy = Base64Url.Encode(policy);
+                Tracer.TraceVerbose($"Base64url encoded policy = \n{policy}\n");
+            }
+
             return GenerateSingleClaimJsonWebToken("AttestationPolicy", policy, signingKey, signingCert);
         }
 

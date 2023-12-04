@@ -1,10 +1,20 @@
 ﻿namespace maa.signing.tool.utils
 {
+    using System.Text;
+
     /// <summary>
     /// Converts to/from Base64URL encoding, per http://www.rfc-editor.org/rfc/rfc4648.txt.
     /// </summary>
     public static class Base64Url
     {
+        /// <summary>Encode UTF8 encoding of a string as a Base64URL encoded string.</summary>
+        /// <param name="bytes">String input buffer.</param>
+        /// <returns>The string, encoded as a Base64URL of the UTF8 encoding of the string.</returns>
+        public static string Encode(string stringValue)
+        {
+            return Encode(UTF8Encoding.UTF8.GetBytes(stringValue));
+        }
+
         /// <summary>Encode a byte array as a Base64URL encoded string.</summary>
         /// <param name="bytes">Raw byte input buffer.</param>
         /// <returns>The bytes, encoded as a Base64URL string.</returns>

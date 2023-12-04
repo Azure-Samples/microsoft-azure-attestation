@@ -22,6 +22,9 @@ namespace maa.signing.tool
 
         [Option('j', "jwtfile", Required = false, HelpText = "Path to store generated JWT")]
         public string JwtFileName { get; set; } = string.Empty;
+
+        [Option('w', "preview", Required = false, HelpText = "Generate files consistent with MAA 2018-09-01-preview api-version")]
+        public bool UseMaaPreviewApiVersion { get; set; } = false;
     }
 
     [Verb("signpolicy", HelpText = "Create a signed policy JWT for upload to an MAA Isolated mode attestation provider")]
@@ -36,9 +39,6 @@ namespace maa.signing.tool
     {
         [Option('c', "certfile", Required = true, HelpText = "Path to certificate file to be signed into a MAA certificate JWT")]
         public string CertFileName { get; set; } = string.Empty;
-
-        [Option('w', "preview", Required = false, HelpText = "Generate files consistent with MAA 2018-09-01-preview api-version")]
-        public bool UseMaaPreviewApiVersion { get; set; } = false;
     }
 
     [Verb("createsigningcert", HelpText = "Create a signing key and certificate")]
