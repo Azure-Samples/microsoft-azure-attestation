@@ -75,7 +75,7 @@ namespace maa.jwt.verifier.sevsnp
 
             if (certificates.Count < 1)
             {
-                throw new Exception($"Failed to find any senf signed certificates in {certificatesString}");
+                throw new Exception($"Failed to find any self-signed certificates in {certificatesString}");
             }
 
             return certificates;
