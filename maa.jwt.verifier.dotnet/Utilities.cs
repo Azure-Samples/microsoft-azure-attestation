@@ -40,8 +40,7 @@ namespace maa.jwt.verifier.sevsnp
             using var doc = JsonDocument.Parse(certificatesString);
             var root = doc.RootElement;
 
-            List<X509Certificate2> certificates = [];
-
+            List<X509Certificate2> certificates = new List<X509Certificate2>();
             if (root.TryGetProperty("keys", out JsonElement keys) && keys.ValueKind == JsonValueKind.Array)
             {
                 foreach (var certEntry in keys.EnumerateArray())
