@@ -64,7 +64,7 @@ namespace maa.jwt.verifier.sevsnp
                                 // Optional logging or debug info:
                                 if (certEntry.TryGetProperty("kid", out var kidProp))
                                 {
-                                    Console.WriteLine($"\tKey ID for self signed signing certificate: {kidProp.GetString()}");
+                                    Console.WriteLine($"\tKey ID for self-signed signing certificate: {kidProp.GetString()}");
                                 }
                             }
                         }
@@ -78,12 +78,6 @@ namespace maa.jwt.verifier.sevsnp
             }
 
             return certificates;
-        }
-
-        public static string GetPemFromX509Certificate2(X509Certificate2 cert)
-        {
-            string pem = RsaToPem(cert.GetRSAPublicKey());
-            return pem;
         }
 
         public static string RsaToPem(RSA? rsa)
@@ -110,12 +104,6 @@ namespace maa.jwt.verifier.sevsnp
             sb.Append("-----END PUBLIC KEY-----\n");
             var pem = sb.ToString();
             return pem;
-        }
-
-        public static byte[] PemStringToRsaBytes(string pem)
-        {
-            using var rsa = PemStringToRsa(pem);
-            return rsa.ExportSubjectPublicKeyInfo();
         }
 
         public static RSA PemStringToRsa(string pem)
