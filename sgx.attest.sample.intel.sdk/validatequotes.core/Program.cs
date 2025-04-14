@@ -71,7 +71,7 @@ namespace validatequotes
                 return Task.CompletedTask;
             };
 
-            var maaService = new AttestationClient(new Uri(endpoint), new DefaultAzureCredential(), options);
+            var maaService = new AttestationClient(new Uri(endpoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }), options);
 
             BinaryData sgxEnclaveReport = BinaryData.FromBytes(HexHelper.ConvertHexToByteArray(enclaveInfo.QuoteHex));
 
