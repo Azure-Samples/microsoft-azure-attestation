@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Security.Attestation" Version="1.0.0" />
-    <PackageReference Include="Azure.Identity" Version="1.3.0.0" />
+    <PackageReference Include="Azure.Identity" Version="1.10.2" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
