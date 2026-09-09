@@ -1,140 +1,165 @@
-## About
+# MAA JWT Verifier Sample
 
-JWT Verifier takes advantage of the Open Enclave SDK API call [oe_verify_attestation_certificate](https://openenclave.io/apidocs/v0.17/enclave_8h_a3b75c5638360adca181a0d945b45ad86.html#a3b75c5638360adca181a0d945b45ad86). See also https://openenclave.io/apidocs/v0.17/index.html .
+## Purpose
 
-> **Warning:** This verifier is sample code provided for informational purposes. It is not a production best-practices solution. The Windows and Ubuntu setup scripts are optional convenience helpers that modify the local build environment and are used at your own risk. They are not guaranteed to run across all operating systems, distributions, releases, or machine configurations. You may preinstall the required dependencies and build the verifier directly with CMake instead.
+This sample demonstrates the certificate-evidence portion of validating a Microsoft Azure Attestation (MAA) JWT. It:
 
-This function performs a custom validation on the input certificate. This validation includes extracting an attestation evidence extension from the certificate before validating this evidence.
+1. Reads the `jku` and `kid` values from the JWT header.
+2. Retrieves the corresponding JSON Web Key Set.
+3. Selects the signing certificate identified by `kid`.
+4. Extracts the legacy Open Enclave/SGX attestation extension (`1.3.6.1.4.1.311.105.1`).
+5. Calls `oe_verify_attestation_certificate` and exposes the verified enclave identity through a callback.
 
-`jwt-verifier` builds and runs on Windows and Ubuntu Linux. The tool performs the following steps:
-- [ ] Parses MAA JWT;
-- [ ] Sends a request to MAA to get certificates;
-- [ ] Deserialize JSON Web Keys and finds x.509 certificates for the key;
-- [ ] Looks up for the MAA x509 extension;
-- [ ] Verifies the certificate using oe_verify_attestation_certificate OpenEnclave API.
- 
-## Windows | Build and Run
+The sample supports only signing certificates that contain this legacy SGX extension. It does not verify signing certificates that use other attestation-evidence formats.
 
-### Prerequisites
-- Dev System with Windows Server 2019
-- MAA JWT sample token as an input for the verification
+This code is intended as a reference for integrating certificate-evidence verification. Consumers must implement the validation required by the remote-attestation standards and security policy applicable to their environment before using the result for a security decision.
 
-### Install Tools
-#### Optional Setup
-- `[Optional]` This step is needed if Internet Explorer is used for the file downloads **and** the `file download` option is disabled. In Internet Explorer, enable the `file download`:
-    - Open Internet Explorer;
-    - Click Tools and then Options;
-    - Click on the Security tab;
-    - Select the Internet Zone;
-    - Click on the Custom Level Button and then scroll down to Download;
-    - Make sure to enable File download;
-    - Click Apply and Ok;
-    - Restart Internet Explorer.
+## Get the Source
 
-#### Required Tools
-1. Download and install Git from https://git-scm.com/download/win
-2. Download and install [Visual Studio Build Tools 2019](https://aka.ms/vs/16/release/vs_buildtools.exe)
-3. Download and install the latest stable CMake version [CMake v3.23.1](https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.msi). If the link does not work, see https://cmake.org/download/
+Install Git before continuing. Clone the repository with its submodules, then change to the repository root.
 
-### Get Sources
-Open Git Bash:
-- `[Optional]` Setup the Git Bash with a new SSH key for the GitHub portal:
-    - Gegerate New SSH Key: `ssh-keygen -t ed25519 -C "<EMAIL>"`
-    - Go through the settings prompt and provide wanted values for the key
-    - `eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub`
-    - Add the new SSH key to the GitHub keys: https://github.com/settings/keys
-    - `git config --global user.email "you@example.com"`
-    - `git config --global user.name "Your Name"`
+On Windows, run the following commands from a PowerShell prompt:
 
-- Clone the repo
-```
-git clone --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
-```
-
-Or in GitBash or PowerShell:
-
-```
+```powershell
 git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
+Set-Location .\microsoft-azure-attestation
 ```
 
-### Set up Environment and Run the Tool
-- In PowerShell, change the directory:
-```
-cd microsoft-azure-attestation\maa.jwt.verifier
+On Ubuntu, run the following commands from a Bash shell:
+
+```bash
+git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
+cd microsoft-azure-attestation
 ```
 
-- Execute the script win_setup_and_build.ps1 or, if desired, manually follow the script's steps:
-```
+The remaining instructions assume the current directory is this repository root.
+
+## Build Scripts
+
+The Windows and Ubuntu scripts are optional convenience helpers. They download dependencies, modify the local build environment, and build the verifier. Review each script before running it. The scripts are provided for sample use and are not guaranteed to work on every operating-system release or machine configuration.
+
+Dependencies may instead be installed separately and the project built directly with CMake.
+
+## Input
+
+The verifier reads a compact MAA JWT from the first line of the input file. The JWT must reference a reachable JSON Web Key Set whose selected signing certificate contains the legacy SGX extension described above.
+
+This sample demonstrates the older validation flow for MAA signing certificates that contain the legacy Open Enclave/SGX extension. It does not support the newer generic attestation-evidence format used by current MAA signing certificates.
+
+## Windows
+
+### Windows Prerequisites
+
+- 64-bit Windows with PowerShell
+- Git
+- CMake
+- MSBuild with the Visual C++ build tools
+- Internet access for dependency downloads
+
+### Build on Windows
+
+Open a PowerShell prompt and run the helper from the repository root:
+
+```powershell
+Set-Location .\maa.jwt.verifier
 .\win_setup_and_build.ps1
 ```
-> These steps include installing the dependencies (NuGet and vcpkg packages), creating the project via CMake, and building it. The script is optional if those dependencies are already installed.
-> Note that the intial execution of the script takes several minutes because it downloads and builds the dependencies.
 
-- Get your MAA JWT for verification to the system.
-- Change directory and run the tool:
+The script attempts to locate MSBuild automatically. Optionally, if it cannot find MSBuild, use the following commands in the same PowerShell prompt to find it with `vswhere.exe`:
 
-```
-cd <PATH-TO-EXE>
-.\jwt-verifier.exe <PATH-TO-JWT>\jwt.txt
+```powershell
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+& $vswhere -latest -products * -requires Microsoft.Component.MSBuild `
+    -find 'MSBuild\**\Bin\MSBuild.exe'
 ```
 
-The tool succeeded if returned:
-```
----     SUCCESS - Verified attestation certificate quote
-```
+Pass the returned path to the build script, for example:
 
-## Linux | Build and Run
-
-### Prerequisites
-- Dev system with Ubuntu 22.04 LTS
-- MAA JWT sample token as an input for the verification
-
-The verifier validates an existing attestation certificate and does not require local SGX hardware. On a non-SGX machine, it can be built and run in an Ubuntu 22.04 Docker container or WSL distribution with the required host-verification packages installed. The convenience script targets Ubuntu 22.04 and requires elevated access to install packages; avoid running it directly on a different WSL distribution.
-
-### Get Sources
-- `[Optional]` Setup the Git Bash with a new SSH key for the GirHub portal:
-    - Gegerate New SSH Key: `ssh-keygen -t ed25519 -C "<EMAIL>"`
-    - Go through the settings prompt and provide wanted values for the key
-    - `eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub`
-    - Add the new SSH key to the GitHub keys: https://github.com/settings/keys
-    - `git config --global user.email "you@example.com"`
-    - `git config --global user.name "Your Name"`
-
-- Clone the repo
-```
-git clone --recursive git@github.com:Azure-Samples/microsoft-azure-attestation.git
+```powershell
+.\win_setup_and_build.ps1 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe'
 ```
 
-Or 
+The executable is written to `tmp\out\Debug\jwt-verifier.exe`.
 
-```
-git clone --recursive https://github.com/Azure-Samples/microsoft-azure-attestation.git
-```
+### Run on Windows
 
-### Set up Environment and Run the Tool
-- Change directory
-```
-cd microsoft-azure-attestation/maa.jwt.verifier
+From the `maa.jwt.verifier` directory, run:
+
+```powershell
+.\tmp\out\Debug\jwt-verifier.exe [--verbose] <path-to-jwt-file>
 ```
 
-- Execute the script ubuntu_setup_and_build.sh or, if desired, manually follow the script's steps:
-```
+## Ubuntu Linux
+
+### Ubuntu Prerequisites
+
+- 64-bit Ubuntu 22.04
+- `sudo` access for package installation
+- Internet access for dependency downloads
+
+Local SGX hardware is not required to verify evidence already contained in a signing certificate. The helper can therefore run on an Ubuntu 22.04 host, container, or WSL distribution.
+
+### Build on Ubuntu
+
+Run the helper from the repository root:
+
+```bash
+cd maa.jwt.verifier
 ./ubuntu_setup_and_build.sh
 ```
 
-- `[Optional]` Check the tool's usage syntax:
-```
-./out/jwt-verifier
+The script configures package repositories, installs host-verification dependencies, updates the shell environment, and writes the executable to `out/jwt-verifier`.
+
+### Run on Ubuntu
+
+From the `maa.jwt.verifier` directory, run:
+
+```bash
+./out/jwt-verifier [--verbose] <path-to-jwt-file>
 ```
 
-- Get your MAA JWT for verification to the system.
-- Change directory and verify quote in JWT:
-```
-./out/jwt-verifier [options] <jwt-filename>
+### Run Ubuntu Locally with Docker
+
+Docker Desktop can be used to build and run the Linux verifier locally without an Ubuntu host. Configure Docker Desktop to use Linux containers.
+
+From the repository root, open a PowerShell prompt and create an Ubuntu 22.04 container with the repository mounted at `/workspace`:
+
+```powershell
+docker run --name maa-jwt-verifier -it -v "${PWD}:/workspace" -w /workspace/maa.jwt.verifier ubuntu:22.04
 ```
 
-For instance:
-```
-./out/jwt-verifier -v ~/samples/jwt.txt
+The prompt is now a Bash shell inside the Ubuntu container. Install `sudo`, then run the existing setup and build helper:
+
+```bash
+apt-get update
+apt-get install -y sudo
+./ubuntu_setup_and_build.sh
 ```
 
+Run the verifier from the same Bash shell. The JWT file must be under the mounted repository so that it is available inside the container:
+
+```bash
+./out/jwt-verifier [--verbose] /workspace/<path-to-jwt-file>
+```
+
+After leaving the container, reopen its Bash shell from a PowerShell prompt with:
+
+```powershell
+docker start -ai maa-jwt-verifier
+```
+
+Remove the container from a PowerShell prompt when it is no longer needed:
+
+```powershell
+docker rm maa-jwt-verifier
+```
+
+## Output
+
+When Open Enclave verifies the certificate evidence successfully, the tool prints:
+
+```text
+---     SUCCESS - Verified attestation certificate quote
+```
+
+With `--verbose`, it also prints the identity values returned to the verification callback.

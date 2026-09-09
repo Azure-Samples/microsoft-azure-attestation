@@ -31,22 +31,34 @@ __msg_stage "Setup Environment"
 
 __msg_stage "Update and Upgrade System"
 sudo apt update && sudo apt -y upgrade
+sudo apt -y install ca-certificates curl
 
 __msg_stage "Configure the Intel and Microsoft APT Repositories"
 # This step and the next one below are based on the Open Enclave's documentation with a few adjustments.
 # See: https://github.com/openenclave/openenclave/blob/master/docs/GettingStartedDocs/install_host_verify_Ubuntu_22.04.md
-echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
-wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+sudo install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo tee /usr/share/keyrings/intel-sgx.asc > /dev/null
+sudo chmod 0644 /usr/share/keyrings/intel-sgx.asc
+echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/intel-sgx.asc] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
 
-echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" | sudo tee /etc/apt/sources.list.d/msprod.list
-wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /usr/share/keyrings/microsoft-prod.asc > /dev/null
+sudo chmod 0644 /usr/share/keyrings/microsoft-prod.asc
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.asc] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" | sudo tee /etc/apt/sources.list.d/msprod.list
 
 __msg_stage "Install the Intel and Open Enclave Host-Verify packages and dependencies"
 # This step also installs the az-dcap-client package which is necessary for performing remote attestation in Azure.
 # A general implementation for using Intel DCAP outside the Azure environment is coming soon.
 # https://github.com/microsoft/azure-dcap-client
 sudo apt update
-sudo apt -y install make cmake g++ llvm-11 libssl-dev libcurl4-openssl-dev libprotobuf23 libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client open-enclave-hostverify
+sudo apt -y install make cmake g++ llvm-11 libssl-dev libcurl4-openssl-dev libprotobuf23 libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
+
+oe_version="0.19.17"
+oe_sha256="3edd550d9bb547d609143f2610b45aad9c2e467b3e4d1416b3a01bbad8fd38d4"
+oe_package="$(mktemp --suffix=.deb)"
+trap 'rm -f "$oe_package"' EXIT
+curl -fsSL "https://github.com/openenclave/openenclave/releases/download/v${oe_version}/Ubuntu_2204_open-enclave-hostverify_${oe_version}_amd64.deb" -o "$oe_package"
+echo "${oe_sha256}  ${oe_package}" | sha256sum --check --status
+sudo apt -y install "$oe_package"
 
 __msg_stage "Read and execute the content of openenclaverc"
 # This step is needed for pkg-config oehostverify-$(CXX) ... command to function properly.

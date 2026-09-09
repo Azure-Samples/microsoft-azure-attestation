@@ -19,6 +19,7 @@ $cur_dir=Get-Location
 $tmp_pkg_dir = Join-Path ([System.IO.Path]::GetTempPath()) "maa-jwt-verifier-$([Guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory -Path $tmp_pkg_dir | Out-Null
 
+try {
 # Download Nuget Tool
 #
 $nuget_file_name = "nuget.exe"
@@ -47,6 +48,10 @@ dir $tmp_pkg_dir
 $oe_output_directory = "$tmp_pkg_dir\oe_installed_nupkg"
 $oe_nuget_args = @('install', $oe_name, '-Source', $tmp_pkg_dir, '-OutputDirectory', $oe_output_directory, '-ExcludeVersion')
 & $nuget_exe $oe_nuget_args
+If($LASTEXITCODE -ne 0)
+{
+    throw "NuGet failed to install $oe_name (exit code $LASTEXITCODE)."
+}
 $oe_path = "$oe_output_directory\$oe_name\OEHOSTVERIFY\openenclave"
 dir $oe_path
 
@@ -70,6 +75,10 @@ $msdcap_nuget_args = @('install', $msdcap_name, '-Source', $tmp_pkg_dir, '-Outpu
 $msdcap_path = $msdcap_output_directory
 $msdcap_nuget_path = "$msdcap_path\$msdcap_name"
 & $nuget_exe $msdcap_nuget_args
+If($LASTEXITCODE -ne 0)
+{
+    throw "NuGet failed to install $msdcap_name (exit code $LASTEXITCODE)."
+}
 # Install DCAP nuget
 cd "$msdcap_nuget_path\tools"
 $msdcap_library_path = "$tmp_pkg_dir\azure_dcap"
@@ -119,4 +128,13 @@ dir $project_exe_dir
 echo "Returning to $cur_dir..."
 
 cd $cur_dir
+}
+finally {
+    Set-Location $cur_dir
+    Remove-Item -LiteralPath $tmp_pkg_dir -Recurse -Force -ErrorAction SilentlyContinue
+    If(Test-Path -LiteralPath $tmp_pkg_dir)
+    {
+        Write-Warning "Failed to remove temporary package directory: $tmp_pkg_dir"
+    }
+}
 
