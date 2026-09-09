@@ -41,4 +41,4 @@ See a code sample to manage trusted signing certificates and keys for Isolated p
 - [EGo's code sample using Azure Attestation](https://github.com/edgelesssys/ego/tree/master/samples/azure_attestation)
 - [Azure Attestation integration in SCONE platform](https://github.com/scontain/scone-azure-integration)
 - [Azure Attestation integration in Occlum](https://github.com/occlum/occlum/tree/master/demos/remote_attestation/azure_attestation)
-
+- [Azure Attestation integration in the Faasm serverless runtime](https://github.com/faasm/faasm/blob/main/docs/source/sgx.md)
