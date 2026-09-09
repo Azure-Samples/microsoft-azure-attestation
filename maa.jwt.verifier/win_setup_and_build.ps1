@@ -53,6 +53,9 @@ If($LASTEXITCODE -ne 0)
     throw "NuGet failed to install $oe_name (exit code $LASTEXITCODE)."
 }
 $oe_path = "$oe_output_directory\$oe_name\OEHOSTVERIFY\openenclave"
+if (-not (Test-Path -LiteralPath $oe_path)) {
+    throw "Open Enclave package was installed but expected path was not found: $oe_path"
+}
 dir $oe_path
 
 # Download and Install MS Azure DCAP Nuget Packages
