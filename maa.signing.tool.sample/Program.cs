@@ -39,7 +39,7 @@ namespace maa.signing.tool
             Tracer.TraceVerbose($"Policy to be signed = \n{policy}\n");
 
             // Sign policy
-            var policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert);
+            var policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert, options.UseMaaPreviewApiVersion);
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(policyJwt)}\n");
 
             // Report JWT
@@ -64,7 +64,7 @@ namespace maa.signing.tool
             var cert = new X509Certificate2(options.CertFileName);
 
             // Sign certificate
-            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert);
+            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert, options.UseMaaPreviewApiVersion);
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(certJwt)}\n");
 
             // Report JWT
