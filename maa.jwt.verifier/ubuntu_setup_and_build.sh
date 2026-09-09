@@ -54,6 +54,8 @@ echo "source /opt/openenclave/share/openenclave/openenclaverc" >> ~/.bashrc
 # This step is needed for supressing the WARNING (it is not an error, it is a warning!) message:
 # Azure Quote Provider: libdcap_quoteprov.so [ERROR]: Could not retrieve environment variable for 'AZDCAP_DEBUG_LOG_LEVEL'
 echo 'export AZDCAP_DEBUG_LOG_LEVEL=None' >> ~/.bashrc
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH:-}"
+export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH:-}"
 source ~/.bashrc
 
 __msg_stage "Build"
