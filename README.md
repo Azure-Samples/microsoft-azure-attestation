@@ -26,6 +26,15 @@ See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest
 
 See code sample to perform SGX attestation using [Intel SDK](./sgx.attest.sample.intel.sdk)
 
+## Retired MAA signer-validation samples
+
+The former native `maa.jwt.verifier` and Open Enclave `validatequotes.net` samples
+validated MAA signer certificates by verifying SGX evidence embedded in a legacy
+certificate extension. This is no longer the supported way to validate MAA signers,
+so those samples have been removed. Consumers must validate MAA attestation tokens
+using the current service signing keys, certificate format, and token-validation
+requirements.
+
 # Sample code to manage trusted signing certificates for Isolated providers
 
 The [Microsoft Azure Attestation service](https://docs.microsoft.com/en-us/azure/attestation/overview) (MAA) allows users to manage their own attestation provider instance.  Furthermore, MAA enables users to operate their instance in *Isolated* mode.  This means:

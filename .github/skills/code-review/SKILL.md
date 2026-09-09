@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review changes to this Microsoft Azure Attestation sample repository for correctness, security, compatibility, regressions, and missing tests. Use for code review, pull request review, diff review, security review, or pre-merge validation across C++, C#, PowerShell, shell, CMake, and documentation."
+description: "Review changes to this Microsoft Azure Attestation sample repository for correctness, security, compatibility, regressions, and missing tests. Use for code review, pull request review, diff review, security review, or pre-merge validation across C, C++, C#, shell, command files, Makefiles, and documentation."
 argument-hint: "Optional review target, such as the current diff, a branch, commit, or pull request"
 ---
 
@@ -12,9 +12,8 @@ Review changes to this repository as security-sensitive sample code intended for
 
 1. Determine the requested review target. If none is given, review the current working-tree diff.
 2. Inspect the changed files and enough owning code, call sites, tests, and documentation to establish intended behavior.
-3. Treat `maa.jwt.verifier/vendors/vcpkg` as third-party vendored code unless the requested change intentionally modifies it.
-4. Ignore generated `bin`, `obj`, build-output, and package-cache files unless they are intentionally part of the change or reveal an artifact-management problem.
-5. Do not modify files during a review unless the user explicitly asks for fixes.
+3. Ignore generated `bin`, `obj`, build-output, and package-cache files unless they are intentionally part of the change or reveal an artifact-management problem.
+4. Do not modify files during a review unless the user explicitly asks for fixes.
 
 ## Public Repository Safety
 
@@ -63,20 +62,20 @@ Do not report speculative concerns without a plausible failure path. Verify that
 
 ## Language And Build Checks
 
-### C++ And CMake
+### C, C++, And Make
 
 - Check pointer and buffer lifetimes, bounds, null handling, resource cleanup on every success and failure path, exception boundaries, and OpenSSL/Open Enclave return values.
 - Check every allocation and acquired handle for a matching release. Prefer RAII and ownership-expressing types; flag leaks, double frees, use-after-free, mismatched allocators, and dangling references.
 - When native ownership or allocation behavior changes, run an available leak detector or sanitizer such as AddressSanitizer, LeakSanitizer, or Valgrind. If none is available, state that leak testing was not performed.
-- Preserve warning-as-error compatibility on Windows and Linux.
-- Check platform conditions, target names, linked libraries, architecture assumptions, and CMake variable spelling.
+- Preserve warning-as-error compatibility for the affected native toolchain.
+- Check platform conditions, target names, linked libraries, architecture assumptions, Make dependencies, and compiler or linker flags.
 
 ### C# And .NET
 
 - Check nullable behavior, async flow, disposal of `IDisposable` and `IAsyncDisposable` resources, unmanaged handles, event-handler lifetime, exception handling, token-validation configuration, and cryptographic API usage.
 - Flag unsupported target frameworks and vulnerable or incompatible package changes when they affect the reviewed behavior.
 
-### PowerShell, Shell, And Command Files
+### Shell And Command Files
 
 - Require quoted paths, terminating error behavior, subprocess exit-code checks, secure temporary directories, and cleanup on failure.
 - Scrutinize privileged package installation, repository/key configuration, and environment mutation.
@@ -97,9 +96,8 @@ Run the narrowest relevant checks available for changed components. Read setup s
 
 For code or build-system changes, a successful compile alone is insufficient: build the affected target and run the affected workflow or executable with representative valid and invalid inputs. Confirm its output and exit status match the documented behavior. If the required environment, hardware, service, credentials, or fixture is unavailable, record the missing runtime validation as a merge risk rather than assuming success.
 
-- Native verifier on Windows: use `maa.jwt.verifier/win_setup_and_build.ps1`, then run the produced verifier with an appropriate fixture.
-- Native verifier on Ubuntu 22.04: use `maa.jwt.verifier/ubuntu_setup_and_build.sh`, then run the produced verifier with an appropriate fixture.
 - .NET projects: run `dotnet build` on the affected project or solution and execute the narrowest applicable sample or test.
+- Native SGX samples: run the affected Make target in its documented SDK environment. Exercise quote generation only when compatible SGX hardware and runtime services are available; otherwise report runtime validation as not verified.
 - Scripts: perform syntax checks where available and exercise failure paths without exposing credentials.
 - Documentation-only changes: validate links, commands, paths, shell syntax, factual claims against the implementation, and `git diff --check`.
 
