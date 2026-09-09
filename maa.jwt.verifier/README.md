@@ -2,6 +2,8 @@
 
 JWT Verifier takes advantage of the Open Enclave SDK API call [oe_verify_attestation_certificate](https://openenclave.io/apidocs/v0.17/enclave_8h_a3b75c5638360adca181a0d945b45ad86.html#a3b75c5638360adca181a0d945b45ad86). See also https://openenclave.io/apidocs/v0.17/index.html .
 
+> **Warning:** This verifier is sample code provided for informational purposes. It is not a production best-practices solution. The Windows and Ubuntu setup scripts are optional convenience helpers that modify the local build environment and are used at your own risk. They are not guaranteed to run across all operating systems, distributions, releases, or machine configurations. You may preinstall the required dependencies and build the verifier directly with CMake instead.
+
 This function performs a custom validation on the input certificate. This validation includes extracting an attestation evidence extension from the certificate before validating this evidence.
 
 `jwt-verifier` builds and runs on Windows and Ubuntu Linux. The tool performs the following steps:
@@ -65,7 +67,7 @@ cd microsoft-azure-attestation\maa.jwt.verifier
 ```
 .\win_setup_and_build.ps1
 ```
-> These steps include installing the dependencies (nuget, vkpkg packages), creating the project via CMake, and building it.
+> These steps include installing the dependencies (NuGet and vcpkg packages), creating the project via CMake, and building it. The script is optional if those dependencies are already installed.
 > Note that the intial execution of the script takes several minutes because it downloads and builds the dependencies.
 
 - Get your MAA JWT for verification to the system.
@@ -84,8 +86,10 @@ The tool succeeded if returned:
 ## Linux | Build and Run
 
 ### Prerequisites
-- Dev System with Ubuntu_18.04
+- Dev system with Ubuntu 22.04 LTS
 - MAA JWT sample token as an input for the verification
+
+The verifier validates an existing attestation certificate and does not require local SGX hardware. On a non-SGX machine, it can be built and run in an Ubuntu 22.04 Docker container or WSL distribution with the required host-verification packages installed. The convenience script targets Ubuntu 22.04 and requires elevated access to install packages; avoid running it directly on a different WSL distribution.
 
 ### Get Sources
 - `[Optional]` Setup the Git Bash with a new SSH key for the GirHub portal:
