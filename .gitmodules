@@ -1,3 +1,0 @@
-[submodule "maa.jwt.verifier/vendors/vcpkg"]
-	path = maa.jwt.verifier/vendors/vcpkg
-	url = https://github.com/microsoft/vcpkg.git

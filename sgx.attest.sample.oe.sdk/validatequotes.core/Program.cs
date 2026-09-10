@@ -83,8 +83,6 @@ namespace validatequotes
                     RuntimeData = new AttestationData( runtimeData, false),
                 });
             var serviceJwtToken = serviceResponse.Token.ToString();
-            
-
 
             Logger.WriteBanner("VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO");
             enclaveInfo.CompareToMaaServiceJwtToken(serviceResponse.Value, this.includeDetails);
