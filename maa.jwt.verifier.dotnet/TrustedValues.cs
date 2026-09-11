@@ -12,10 +12,10 @@ namespace maa.jwt.verifier.sevsnp
         // -----------------------------------------------------------------------------------
 
         /// <summary>
-        /// AMD root key for validating UVM endorsements. Provided by AMD.
+        /// AMD Milan root key for validating SEVSNP reports. Provided by AMD.
         /// Contact AMD for updates or rotated root keys.
         /// </summary>
-        public const string AmdRootKey = @"-----BEGIN PUBLIC KEY-----
+        public const string AmdRootKeyMilan = @"-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA0Ld52RJOdeiJlqK2JdsV
 mD7FktuotWwX1fNgW41XY9Xz1HEhSUmhLz9Cu9DHRlvgJSNxbeYYsnJfvyjx1MfU
 0V5tkKiU1EesNFta1kTA0szNisdYc9isqk7mXT5+KfGRbfc4V/9zRIcE8jlHN61S
@@ -31,7 +31,7 @@ QPHfbkH0CyPfhl1jWhJFZasCAwEAAQ==
 -----END PUBLIC KEY-----";
 
         /// <summary>
-        /// AMD Genoa-specific root key for validating UVM endorsements from Genoa platforms.
+        /// AMD Genoa root key for validating SEVSNP reports. Provided by AMD.
         /// Contact AMD for updates or rotated root keys.
         /// </summary>
         public const string AmdRootKeyGenoa = @"-----BEGIN PUBLIC KEY-----
@@ -49,10 +49,31 @@ HP1qYrnvhzaG1S70vw6OkbaaC9EjiH/uHgAJQGxon7u0Q7xgoREWA/e7JcBQwLg8
 0Hq/sbRuqesxz7wBWSY254cCAwEAAQ==
 -----END PUBLIC KEY-----";
 
+        /// <summary>
+        /// AMD Turin root key for validating SEVSNP reports. Provided by AMD.
+        /// Contact AMD for updates or rotated root keys.
+        /// </summary>
+        public const string AmdRootKeyTurin = @"-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwaAriB7EIuVc4ZB1wD3Y
+fDxL+9eyS7+izm0Jj3W772NINCWl8Bj3w/JD2ZjmbRxWdIq/4d9iarCKorXloJUB
+1jRdgxqccTx1aOoig4+2w1XhVVJT7K457wT5ZLNJgQaxqa9Etkwjd6+9sOhlCDE9
+l43kQ0R2BikVJa/uyyVOSwEk5w5tXKOuG9jvq6QtAMJasW38wlqRDaKEGtZ9VUgG
+on27ZuL4sTJuC/azz9/iQBw8kEilzOl95AiTkeY5jSEBDWbAqnZk5qlM7kISKG20
+kgQm14mhNKDI2p2oua+zuAG7i52epoRF2GfU0TYk/yf+vCNB2tnechFQuP2e8bLk
+95ZdqPi9/UWw4JXjtdEA4u2JYplSSUPQVAXKt6LVqujtJcM59JKr2u0XQ75KwxcM
+p15gSXhBfInvPAwuAY4dEwwGqT8oIg4esPHwEsmChhYeDIxPG9R4fx9O0q6p8Gb+
+HXlTiS47P9YNeOpidOUKzDl/S1OvyhDtSL8LJc24QATFydo/iD/KUdvFTRlD0crk
+AMkZLoWQ8hLDGc6BZJXsdd7Zf2e4UW3tI/1oh/2t23Ot3zyhTcv5gDbABu0LjVe9
+8uRnS15SMwK//lJt9e5BqKvgABkSoABf+B4VFtPVEX0ygrYaFaI9i5ABrxnVBmzX
+pRb21iI1NlNCfOGUPIhVpWECAwEAAQ==
+-----END PUBLIC KEY-----";
+
+
         public static readonly List<string> AmdRootKeys = new()
         {
-            TrustedValues.AmdRootKey,
-            TrustedValues.AmdRootKeyGenoa
+            TrustedValues.AmdRootKeyMilan,
+            TrustedValues.AmdRootKeyGenoa,
+            TrustedValues.AmdRootKeyTurin
         };
 
         // -----------------------------------------------------------------------------------
