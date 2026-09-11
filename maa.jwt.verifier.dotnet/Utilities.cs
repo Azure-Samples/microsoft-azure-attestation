@@ -183,18 +183,45 @@ namespace maa.jwt.verifier.sevsnp
         public static bool BuildAndValidateCertChain(
             List<X509Certificate2>? certs,
             RSA[] trustedKeys,
-            CertValidationTarget target)
+            CertValidationTarget target,
+            bool ignoreLeafExpiration = false)
         {
             using var chain = new X509Chain();
             chain.ChainPolicy.ExtraStore.AddRange(certs?.ToArray() ?? []);
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
 
+            if (ignoreLeafExpiration)
+            {
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.IgnoreNotTimeValid;
+            }
+
             var leafCert = certs?.FirstOrDefault();
             if (leafCert == null || !chain.Build(leafCert))
             {
                 Console.WriteLine("ERROR: Failed to build certificate chain.");
                 return false;
+            }
+
+            if (ignoreLeafExpiration)
+            {
+                DateTime now = DateTime.UtcNow;
+                if (now < leafCert.NotBefore.ToUniversalTime())
+                {
+                    Console.WriteLine("ERROR: Leaf certificate is not valid yet.");
+                    return false;
+                }
+
+                foreach (var chainElement in chain.ChainElements.Cast<X509ChainElement>().Skip(1))
+                {
+                    var certificate = chainElement.Certificate;
+                    if (now < certificate.NotBefore.ToUniversalTime() ||
+                        now > certificate.NotAfter.ToUniversalTime())
+                    {
+                        Console.WriteLine($"ERROR: Non-leaf certificate is outside its validity period: {certificate.Subject}");
+                        return false;
+                    }
+                }
             }
 
             X509Certificate2 certToValidate = target switch
