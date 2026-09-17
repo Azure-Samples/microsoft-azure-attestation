@@ -358,7 +358,7 @@ namespace maa.jwt.verifier.sevsnp
 
                 // Step 3: Validate full certificate chain (COSE Sign1 Object -> ProtectedHeaders -> x5chain).
                 var trustedRoots = new[] { Utils.PemStringToRsa(((CoseSign1.TrustedCertChainSigner)trustAnchor.Signer).CertChain.PemRootCaPublicKey) };
-                if (!Utils.BuildAndValidateCertChain(certificates, trustedRoots, Utils.CertValidationTarget.Root))
+                if (!Utils.BuildAndValidateCertChain(certificates, trustedRoots, Utils.CertValidationTarget.Root, ignoreLeafExpiration: true))
                 {
                     Console.WriteLine("ERROR: Certificate chain validation failed.");
                     return false;
