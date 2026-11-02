@@ -63,6 +63,19 @@ The verification that the Azure Attestation JWT claims match the initial parsed 
 public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
 ```
 
+## About the Enclave Signing Key
+
+The build signs the sample enclave with `oesign` using a 3072-bit RSA key pair. The key pair is not part of the repository: the first `make build` generates `genquotes/enclave/private.pem` and `genquotes/enclave/public.pem` with OpenSSL. Both files are listed in [.gitignore](.gitignore).
+
+* The signing key determines the enclave's signer identity, **MRSIGNER**, so your build reports your own MRSIGNER.
+* Keep `private.pem` private and never commit it. Anyone who has it can sign an enclave that reports your MRSIGNER.
+* `make clean` deletes the key pair. The next `make build` generates a new pair, so MRSIGNER changes. Back up `private.pem` if you need a stable MRSIGNER across builds.
+* For production enclaves, protect the signing key, for example in an HSM, instead of keeping it next to the build.
+
+The example quotes in [genquotes/quotes](genquotes/quotes) were generated on Azure SGX hardware with an earlier demo signing key that used to be committed to this repository. That key has been retired. Because it was public, **never trust its MRSIGNER** (`62ba6bcab59700c340bdbcd36bf74c6e0d6892cdf91671dca93bcbfff81ef9f2`) in an attestation policy or relying party. The example quotes still validate as-is: `validatequotes.core` compares the Azure Attestation claims with the values recorded in each JSON file.
+
+The debug configuration (`enc.conf`, `Debug=1`) produces a debuggable enclave whose memory the host can read. Azure Attestation reports this as `x-ms-sgx-is-debuggable: true`; production policies should reject it.
+
 ## Instructions to Build and Run Yourself
 
 To set up the pre-requisites to build and run these samples:
