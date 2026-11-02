@@ -22,7 +22,7 @@ The flow is:
     1. Calls into the Open Enclave SDK to parse the remote quote to retrieve important attributes like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Persists the remote quote, enclave held data and parsed report fields to a JSON file on disk
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Open Enclave SDK.  It exposes one ecall to retrieve a remote quote and enclave held data.
-1. ```validatequotes.core``` - This application is built on .NET core and runs on any platform.  It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
+1. ```validatequotes.core``` - This application is built on .NET and runs on any platform.  It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
     1. Calls the Azure Attestation for validation, passing it the remote quote and enclave held data found in the JSON file
     1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
     1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
@@ -32,7 +32,7 @@ The flow is:
 ## Remote Quote Generation
 *Note: The SGX enclave code in this sample is derived from the [remote_attestation sample code](https://github.com/openenclave/openenclave/tree/master/samples/remote_attestation) in Open Enclave SDK.  Many thanks to the author(s)!*
 
-Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](../sgx.attest.sample/genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
+Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
 ```
 result = oe_get_report(
     OE_REPORT_FLAGS_REMOTE_ATTESTATION,
@@ -46,21 +46,27 @@ result = oe_get_report(
 
 ## Remote Quote Validation via Azure Attestation
 
-Azure Attestation is called to perform attestation by the following call in the [MaaService.cs](../sgx.attest.sample/validatequotes.core/MaaService.cs#L32) file:
+Azure Attestation is called through the Azure Attestation client library (`Azure.Security.Attestation`) by the following call in the [Program.cs](validatequotes.core/Program.cs#L79) file:
 
 ```
-// Send request
-var response = await theHttpClient.SendAsync(request);
+var serviceResponse = await maaService.AttestOpenEnclaveAsync(
+    new AttestationRequest
+    {
+        Evidence = openEnclaveReport,
+        RuntimeData = new AttestationData(runtimeData, false),
+    });
 ```
 
-The verification that the Azure Attestation JWT passes signature validation and is issued by the expected issuer is in the  [JwtValidationHelper.cs](../sgx.attest.sample/validatequotes.core/Helpers/JwtValidationHelper.cs#L15) file:
+The client is created with `DefaultAzureCredential` ([Program.cs](validatequotes.core/Program.cs#L73)), so you must be signed in to Azure, for example with `az login`, before running the application.
+
+The client library validates the Azure Attestation JWT signature and issuer. The sample's additional checks of the token signing certificate issuer and the issuer claim are in the [JwtValidationHelper.cs](validatequotes.core/Helpers/JwtValidationHelper.cs#L13) file:
 ```
-public static TokenValidationResult ValidateMaaJwt(string attestDnsName, string serviceJwt, bool includeDetails)
+public static bool ValidateMaaJwt(string attestDnsName, AttestationToken serviceToken, AttestationSigner tokenSigner, bool includeDetails)
 ```
 
-The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](../sgx.attest.sample/validatequotes.core/EnclaveInfo.cs#L31) file:
+The verification that the Azure Attestation JWT claims match the initial parsed report data is performed in the [EnclaveInfo.cs](validatequotes.core/EnclaveInfo.cs#L24) file:
 ```
-public void CompareToMaaServiceJwtToken(string serviceJwtToken, bool includeDetails)
+public void CompareToMaaServiceJwtToken(AttestationResult serviceResult, bool includeDetails)
 ```
 
 ## About the Enclave Signing Key
@@ -74,46 +80,42 @@ The build signs the sample enclave with `oesign` using a 3072-bit RSA key pair. 
 
 The example quotes in [genquotes/quotes](genquotes/quotes) were generated on Azure SGX hardware with an earlier demo signing key that used to be committed to this repository. That key has been retired. Because it was public, **never trust its MRSIGNER** (`62ba6bcab59700c340bdbcd36bf74c6e0d6892cdf91671dca93bcbfff81ef9f2`) in an attestation policy or relying party. The example quotes still validate as-is: `validatequotes.core` compares the Azure Attestation claims with the values recorded in each JSON file.
 
-The debug configuration (`enc.conf`, `Debug=1`) produces a debuggable enclave whose memory the host can read. Azure Attestation reports this as `x-ms-sgx-is-debuggable: true`; production policies should reject it.
+The debug configuration (`enc.conf`, `Debug=1`) produces a debuggable enclave: a debugger on the host can read and modify its memory. Azure Attestation reports this as `x-ms-sgx-is-debuggable: true`; production policies should reject it.
 
 ## Instructions to Build and Run Yourself
 
 To set up the pre-requisites to build and run these samples:
-1. Install Ubuntu 18.04 on an [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/) VM.
-1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/v0.9.x/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_18.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
+1. Create an Ubuntu 20.04 VM with Intel SGX from [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/).
+1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/master/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_20.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
 1. Add the command "```. /opt/openenclave/share/openenclave/openenclaverc```" to your ~/.bashrc file.
-1. Install the [.NET 5.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/5.0) on this VM.
-    1. `wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb`
-    1. `sudo dpkg -i packages-microsoft-prod.deb`
-    1. `rm packages-microsoft-prod.deb`
-    1. `sudo apt update`
-    1. `sudo apt install -y apt-transport-https && sudo apt update && sudo apt install -y dotnet-sdk-5.0`
-1. Reboot the VM.
+1. Install the [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) on this VM. The Open Enclave SDK installation already adds the Microsoft package repository, so run:
+    1. `sudo apt update && sudo apt install -y dotnet-sdk-8.0`
+1. Install the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-linux) and sign in with `az login`. `validatequotes.core` uses these credentials to call Azure Attestation.
 
 To build and run the samples:
 1. ```git clone https://github.com/Azure-Samples/microsoft-azure-attestation``` to the VM
-1. ```cd sgx.attest.sample.oe.sdk```
+1. ```cd microsoft-azure-attestation/sgx.attest.sample.oe.sdk```
 1. To build, run and generate the JSON files do the following:
     1. ```cd genquotes```
-    1. ```make build```
+    1. ```make build```. The first build generates the enclave signing key; see [About the Enclave Signing Key](#about-the-enclave-signing-key).
     1. ```sudo make run```
-    1. This runs the application in four different enclave configurations to generate four different remote quotes.  You should see four new files created in the ```../quotes``` directory.
+    1. This runs the application in four different enclave configurations to generate four different remote quotes.  The four JSON files are written to the ```genquotes/quotes``` directory, replacing the example quotes.
 1. To build, run and validate the JSON files with Azure Attestation do the following:
-    1. ```cd validatequotes.core```
+    1. ```cd ../validatequotes.core```
     1. ```./runall.sh```
     1. This builds and runs the validation application against the four different JSON files produced earlier.
 
 The four different JSON files are:
 * *enclave.info.debug.json* - debugging enabled
 * *enclave.info.release.json* - debugging disabled
-* *enclave.info.securityversion.json* - security version set to 999
-* *enclave.info.prodid.json* - product id set to 999
+* *enclave.info.securityversion.json* - security version set to 8888
+* *enclave.info.prodid.json* - product id set to 9999
 
 ## Example Output for make run
 Here is an example of what the output of ```make run``` should look like:
 
 ```
-greg@gnksgxlinuxvm0:~/src/github/maa-sample/sgx.attest.sample/genquotes$ sudo make run
+user@sgxvm:~/microsoft-azure-attestation/sgx.attest.sample.oe.sdk/genquotes$ sudo make run
 host/genquote_host ./enclave/genquote_enclave.debug.signed              enclave.info.debug.json
     JSON file created: enclave.info.debug.json
 host/genquote_host ./enclave/genquote_enclave.release.signed            enclave.info.release.json
@@ -125,114 +127,32 @@ host/genquote_host ./enclave/genquote_enclave.securityversion.signed    enclave.
 ```
 
 ## Example Output for ./runall.sh
-Here is an example of what the output of ```./runall.sh``` should look like:
+Here is an example of the output of ```./runall.sh``` for the first JSON file. The same checks are repeated for the other three files:
 
 ```
-greg@gnksgxlinuxvm0:~/src/github/maa-sample/sgx.attest.sample/validatequotes.core$ ./runall.sh 
-[16:52:29.213] : 
-[16:52:29.235] : ************************************************************************************************************************
-[16:52:29.235] : *      PARAMETERS FOR THIS RUN
-[16:52:29.235] : ************************************************************************************************************************
-[16:52:29.235] : Validating filename                : ../genquotes/quotes/enclave.info.debug.json
-[16:52:29.235] : Using attestation provider         : sharedcus.cus.attest.azure.net
-[16:52:29.235] : Including details                  : False
-[16:52:29.870] : 
-[16:52:29.870] : ************************************************************************************************************************
-[16:52:29.870] : *      VALIDATING MAA JWT TOKEN - BASICS
-[16:52:29.870] : ************************************************************************************************************************
-[16:52:29.893] : JWT JKU location validation        : True
-[16:52:30.325] : JWT signature validation           : True
-[16:52:30.326] : JWT issuer claim validation        : True
-[16:52:30.326] : JWT signing cert issuer validation : True
-[16:52:30.326] : 
-[16:52:30.326] : ************************************************************************************************************************
-[16:52:30.326] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
-[16:52:30.326] : ************************************************************************************************************************
-[16:52:30.328] : IsDebuggable match                 : True
-[16:52:30.328] : MRENCLAVE match                    : True
-[16:52:30.328] : MRSIGNER match                     : True
-[16:52:30.329] : ProductID match                    : True
-[16:52:30.329] : Security Version match             : True
-[16:52:30.329] : Enclave Held Data match            : True
-[16:52:30.329] : 
-[16:52:31.485] : 
-[16:52:31.507] : ************************************************************************************************************************
-[16:52:31.507] : *      PARAMETERS FOR THIS RUN
-[16:52:31.507] : ************************************************************************************************************************
-[16:52:31.507] : Validating filename                : ../genquotes/quotes/enclave.info.release.json
-[16:52:31.507] : Using attestation provider         : sharedcus.cus.attest.azure.net
-[16:52:31.507] : Including details                  : False
-[16:52:31.976] : 
-[16:52:31.976] : ************************************************************************************************************************
-[16:52:31.976] : *      VALIDATING MAA JWT TOKEN - BASICS
-[16:52:31.976] : ************************************************************************************************************************
-[16:52:32.011] : JWT JKU location validation        : True
-[16:52:32.477] : JWT signature validation           : True
-[16:52:32.477] : JWT issuer claim validation        : True
-[16:52:32.478] : JWT signing cert issuer validation : True
-[16:52:32.478] : 
-[16:52:32.478] : ************************************************************************************************************************
-[16:52:32.478] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
-[16:52:32.478] : ************************************************************************************************************************
-[16:52:32.480] : IsDebuggable match                 : True
-[16:52:32.480] : MRENCLAVE match                    : True
-[16:52:32.480] : MRSIGNER match                     : True
-[16:52:32.480] : ProductID match                    : True
-[16:52:32.480] : Security Version match             : True
-[16:52:32.480] : Enclave Held Data match            : True
-[16:52:32.480] : 
-[16:52:33.641] : 
-[16:52:33.662] : ************************************************************************************************************************
-[16:52:33.662] : *      PARAMETERS FOR THIS RUN
-[16:52:33.662] : ************************************************************************************************************************
-[16:52:33.662] : Validating filename                : ../genquotes/quotes/enclave.info.prodid.json
-[16:52:33.662] : Using attestation provider         : sharedcus.cus.attest.azure.net
-[16:52:33.662] : Including details                  : False
-[16:52:34.195] : 
-[16:52:34.195] : ************************************************************************************************************************
-[16:52:34.195] : *      VALIDATING MAA JWT TOKEN - BASICS
-[16:52:34.195] : ************************************************************************************************************************
-[16:52:34.216] : JWT JKU location validation        : True
-[16:52:34.567] : JWT signature validation           : True
-[16:52:34.567] : JWT issuer claim validation        : True
-[16:52:34.567] : JWT signing cert issuer validation : True
-[16:52:34.567] : 
-[16:52:34.567] : ************************************************************************************************************************
-[16:52:34.567] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
-[16:52:34.567] : ************************************************************************************************************************
-[16:52:34.569] : IsDebuggable match                 : True
-[16:52:34.570] : MRENCLAVE match                    : True
-[16:52:34.570] : MRSIGNER match                     : True
-[16:52:34.570] : ProductID match                    : True
-[16:52:34.570] : Security Version match             : True
-[16:52:34.570] : Enclave Held Data match            : True
-[16:52:34.570] : 
-[16:52:35.705] : 
-[16:52:35.727] : ************************************************************************************************************************
-[16:52:35.727] : *      PARAMETERS FOR THIS RUN
-[16:52:35.727] : ************************************************************************************************************************
-[16:52:35.727] : Validating filename                : ../genquotes/quotes/enclave.info.securityversion.json
-[16:52:35.727] : Using attestation provider         : sharedcus.cus.attest.azure.net
-[16:52:35.727] : Including details                  : False
-[16:52:36.328] : 
-[16:52:36.328] : ************************************************************************************************************************
-[16:52:36.328] : *      VALIDATING MAA JWT TOKEN - BASICS
-[16:52:36.328] : ************************************************************************************************************************
-[16:52:36.350] : JWT JKU location validation        : True
-[16:52:36.779] : JWT signature validation           : True
-[16:52:36.779] : JWT issuer claim validation        : True
-[16:52:36.779] : JWT signing cert issuer validation : True
-[16:52:36.779] : 
-[16:52:36.779] : ************************************************************************************************************************
-[16:52:36.779] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
-[16:52:36.779] : ************************************************************************************************************************
-[16:52:36.781] : IsDebuggable match                 : True
-[16:52:36.781] : MRENCLAVE match                    : True
-[16:52:36.782] : MRSIGNER match                     : True
-[16:52:36.782] : ProductID match                    : True
-[16:52:36.782] : Security Version match             : True
-[16:52:36.782] : Enclave Held Data match            : True
-[16:52:36.782] : 
+user@sgxvm:~/microsoft-azure-attestation/sgx.attest.sample.oe.sdk/validatequotes.core$ ./runall.sh
+[13:44:08.747] : 
+[13:44:08.779] : ************************************************************************************************************************
+[13:44:08.779] : *      PARAMETERS FOR THIS RUN
+[13:44:08.779] : ************************************************************************************************************************
+[13:44:08.779] : Validating filename                : ../genquotes/quotes/enclave.info.debug.json
+[13:44:08.779] : Using attestation provider         : sharedcus.cus.attest.azure.net
+[13:44:08.779] : Including details                  : False
+[13:44:25.932] : 
+[13:44:25.932] : ************************************************************************************************************************
+[13:44:25.932] : *      IN VALIDATION CALLBACK, VALIDATING MAA JWT TOKEN - BASICS
+[13:44:25.932] : ************************************************************************************************************************
+[13:44:25.950] : JWT issuer claim validation        : True
+[13:44:25.951] : JWT signing cert issuer validation : True
+[13:44:25.952] : 
+[13:44:25.952] : ************************************************************************************************************************
+[13:44:25.952] : *      VALIDATING MAA JWT TOKEN - MATCHES CLIENT ENCLAVE INFO
+[13:44:25.952] : ************************************************************************************************************************
+[13:44:25.955] : IsDebuggable match                 : True
+[13:44:25.955] : MRENCLAVE match                    : True
+[13:44:25.955] : MRSIGNER match                     : True
+[13:44:25.956] : ProductID match                    : True
+[13:44:25.957] : Security Version match             : True
+[13:44:25.957] : Enclave Held Data match            : True
+...
 ```
-
-
