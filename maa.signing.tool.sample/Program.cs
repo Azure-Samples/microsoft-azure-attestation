@@ -7,25 +7,26 @@ namespace maa.signing.tool
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            new Program().Run(args);
+            return new Program().Run(args);
         }
 
-        public void Run(string[] args)
+        public int Run(string[] args)
         {
             try
             {
-                Parser.Default.ParseArguments<SignPolicyOptions, SignCertOptions, CreateSigningCertOptions>(args)
+                return Parser.Default.ParseArguments<SignPolicyOptions, SignCertOptions, CreateSigningCertOptions>(args)
                   .MapResult(
                     (SignPolicyOptions options) => { InitTracing(options); return SignPolicy(options); },
                     (SignCertOptions options) => { InitTracing(options); return SignCert(options); },
                     (CreateSigningCertOptions options) => { InitTracing(options); return CreateSigningCert(options); },
-                    errors => 1);
+                    errors => errors.All(e => e is HelpRequestedError || e is HelpVerbRequestedError || e is VersionRequestedError) ? 0 : 1);
             }
             catch (ValidationFailedException)
             {
-                // Ignore since error has already been reported
+                // Error has already been reported
+                return 1;
             }
         }
 

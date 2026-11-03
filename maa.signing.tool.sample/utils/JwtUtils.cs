@@ -44,9 +44,9 @@ namespace maa.signing.tool.utils
         {
             try
             {
-                return JsonConvert.DeserializeObject<string>(policy) ?? string.Empty;
+                return System.Text.Json.JsonSerializer.Deserialize<string>(policy) ?? string.Empty;
             }
-            catch (JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 throw new FormatException("The policy file starts with a double quote but isn't a valid JSON string. Provide the policy text, or the policy text as a single JSON string.", ex);
             }
