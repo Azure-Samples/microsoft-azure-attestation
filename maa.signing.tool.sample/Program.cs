@@ -39,7 +39,16 @@ namespace maa.signing.tool
             Tracer.TraceVerbose($"Policy to be signed = \n{policy}\n");
 
             // Sign policy
-            var policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+            string policyJwt;
+            try
+            {
+                policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+            }
+            catch (FormatException ex)
+            {
+                Tracer.TraceError(ex.Message);
+                throw new ValidationFailedException(ex.Message);
+            }
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(policyJwt)}\n");
 
             // Report JWT

@@ -9,12 +9,14 @@ namespace maa.signing.tool.utils
     {
         public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
         {
+            bool isJsonString = policy.TrimStart().StartsWith('"');
+
             if (!useMaaPreviewApiVersion)
             {
                 // GA api-versions expect the Base64Url encoding of the UTF-8 policy text as a JSON string.
-                if (policy.StartsWith('"'))
+                if (isJsonString)
                 {
-                    policy = JsonConvert.DeserializeObject<string>(policy) ?? string.Empty;
+                    policy = DecodeJsonString(policy);
                 }
 
                 string encodedPolicy = Base64Url.Encode(policy);
@@ -22,7 +24,7 @@ namespace maa.signing.tool.utils
                 return GenerateSingleClaimJsonWebToken("AttestationPolicy", JsonConvert.ToString(encodedPolicy), signingKey, signingCert);
             }
 
-            if (!policy.StartsWith('"'))
+            if (!isJsonString)
             {
                 policy = policy.Replace("\n", @"\n");
                 policy = policy.Replace("\r", @"\r");
@@ -30,8 +32,24 @@ namespace maa.signing.tool.utils
                 policy = "\"" + policy + "\"";
                 Tracer.TraceVerbose($"Updated policy to be signed = \n{policy}\n");
             }
+            else
+            {
+                DecodeJsonString(policy);
+            }
 
             return GenerateSingleClaimJsonWebToken("AttestationPolicy", policy, signingKey, signingCert);
+        }
+
+        private static string DecodeJsonString(string policy)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<string>(policy) ?? string.Empty;
+            }
+            catch (JsonException ex)
+            {
+                throw new FormatException("The policy file starts with a double quote but isn't a valid JSON string. Provide the policy text, or the policy text as a single JSON string.", ex);
+            }
         }
 
         public static string GenerateSignedCertificateJsonWebToken(X509Certificate2 embeddedCertificate, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
