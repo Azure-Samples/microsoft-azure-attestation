@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Security.Attestation" Version="1.0.0" />
+    <PackageReference Include="Azure.Security.Attestation" Version="2.0.0" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
   </ItemGroup>
 
