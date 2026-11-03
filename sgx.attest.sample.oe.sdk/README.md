@@ -30,7 +30,7 @@ The flow is:
 
 
 ## Remote Quote Generation
-*Note: The SGX enclave code in this sample is derived from the [remote_attestation sample code](https://github.com/openenclave/openenclave/tree/master/samples/remote_attestation) in Open Enclave SDK.  Many thanks to the author(s)!*
+*Note: The SGX enclave code in this sample is derived from the remote attestation sample code in Open Enclave SDK, now the [attestation sample](https://github.com/openenclave/openenclave/tree/master/samples/attestation).  Many thanks to the author(s)!*
 
 Remote quote generation is performed by the following call to the ```oe_get_report``` method in the [attestation.cpp](genquotes/common/attestation.cpp#L43) file in the ```genquote_enclave``` application.
 ```
@@ -85,11 +85,12 @@ The debug configuration (`enc.conf`, `Debug=1`) produces a debuggable enclave: a
 ## Instructions to Build and Run Yourself
 
 To set up the pre-requisites to build and run these samples:
-1. Create an Ubuntu 20.04 VM with Intel SGX from [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/).
-1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/master/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_20.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
+1. Create an Ubuntu 22.04 VM with Intel SGX from [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/).
+1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/master/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_22.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
 1. Add the command "```. /opt/openenclave/share/openenclave/openenclaverc```" to your ~/.bashrc file.
-1. Install the [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) on this VM. The Open Enclave SDK installation already adds the Microsoft package repository, so run:
-    1. `sudo apt update && sudo apt install -y dotnet-sdk-8.0`
+1. Install the [.NET 10.0 SDK](https://learn.microsoft.com/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204) on this VM. On Ubuntu 22.04, .NET 10 is available from the Ubuntu .NET backports package repository:
+    1. `sudo add-apt-repository ppa:dotnet/backports`
+    1. `sudo apt update && sudo apt install -y dotnet-sdk-10.0`
 1. Install the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-linux) and sign in with `az login`. `validatequotes.core` uses these credentials to call Azure Attestation.
 
 To build and run the samples:
