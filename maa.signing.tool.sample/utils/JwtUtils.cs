@@ -9,6 +9,18 @@ namespace maa.signing.tool.utils
     {
         public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
         {
+            if (!useMaaPreviewApiVersion)
+            {
+                // GA api-versions expect the Base64Url encoding of the UTF-8 policy text as a JSON string.
+                if (policy.StartsWith('"'))
+                {
+                    policy = JsonConvert.DeserializeObject<string>(policy) ?? string.Empty;
+                }
+
+                string encodedPolicy = Base64Url.Encode(policy);
+                Tracer.TraceVerbose($"Base64url encoded policy = \n{encodedPolicy}\n");
+                return GenerateSingleClaimJsonWebToken("AttestationPolicy", JsonConvert.ToString(encodedPolicy), signingKey, signingCert);
+            }
 
             if (!policy.StartsWith('"'))
             {
@@ -17,12 +29,6 @@ namespace maa.signing.tool.utils
                 policy = policy.Replace("\"", "\\\"");
                 policy = "\"" + policy + "\"";
                 Tracer.TraceVerbose($"Updated policy to be signed = \n{policy}\n");
-            }
-
-            if (!useMaaPreviewApiVersion)
-            {
-                policy = Base64Url.Encode(policy);
-                Tracer.TraceVerbose($"Base64url encoded policy = \n{policy}\n");
             }
 
             return GenerateSingleClaimJsonWebToken("AttestationPolicy", policy, signingKey, signingCert);

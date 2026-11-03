@@ -1,6 +1,6 @@
 # Overview
 
-This project contains .NET 6 C# code for a console application that can be used to create signed JWT's to work with the MAA service when it's running in *Isolated* mode.  Since the code is written using .NET 6, it can run on Windows, Linux or a Mac. This tool supports:
+This project contains .NET 10 C# code for a console application that can be used to create signed JWT's to work with the MAA service when it's running in *Isolated* mode.  Since the code is written using .NET 10, it can run on Windows, Linux or a Mac. This tool supports:
 * creating a signing key and certificate
 * using a signing key + certificate to create a signed policy JWT
 * using a signing key + certificate to create a signed certificate JWT
@@ -38,28 +38,21 @@ To create a signing key and certificate files follow these steps:
 Now that you have generated a signing key and certificate, you can create an MAA attestation provider in *Isolated* mode.  Here is how in PowerShell:
 
 ```PowerShell
-PS C:\maa> New-AzAttestation -ResourceGroupName gnkdemo -Name isolatedtest001 -Location westus -PolicySignersCertificateFile .\mycert.crt
+PS C:\maa> New-AzAttestationProvider -ResourceGroupName gnkdemo -Name isolatedtest001 -Location westus -PolicySigningCertificateKeyPath .\mycert.crt
 
-
-Id                : /subscriptions/d7e5bff8-d14b-4d3c-a40d-754659ef53b5/resourceGroups/gnkdemo/providers/Microsoft.Attestation/attestationProviders/isolatedtest001
-Location          : westus
-ResourceGroupName : gnkdemo
-Name              : isolatedtest001
-Status            : Ready
-TrustModel        : Isolated
-AttestUri         : https://isolatedtest001.wus.attest.azure.net
-Tags              :
-TagsTable         :
+Location Name            ResourceGroupName
+-------- ----            -----------------
+westus   isolatedtest001 gnkdemo
 ```
 
 ## Create signed policy JWT
 
-To create a signed policy JWT, run the maa.signing.tool using the `signpolicy` command pointing to a text file containing the policy you want to sign.  Specify the `-v` flag if you want a bit more detail about the JWT that's generated.
+To create a signed policy JWT, run the maa.signing.tool using the `signpolicy` command pointing to a text file containing the policy you want to sign.  Specify the `-v` flag if you want a bit more detail about the JWT that's generated.  By default, the policy JWT is in the format used by all MAA api-versions except the original preview (2018-09-01-preview); specify the `-w` flag to generate it for the original preview api-version.
 
 ```
 C:\src\attestation\maa.signing.tool>dotnet run -- help signpolicy
 maa.signing.tool 1.0.0
-Copyright (C) 2021 maa.signing.tool
+Copyright (C) 2026 maa.signing.tool
 
   -p, --policyfile         Required. Path to text file that contains the MAA policy to be signed into a MAA policy JWT
 
@@ -71,6 +64,8 @@ Copyright (C) 2021 maa.signing.tool
 
   -j, --jwtfile            Path to store generated JWT
 
+  -w, --preview            Generate files consistent with MAA 2018-09-01-preview api-version
+
   -v, --verbose            Enable verbose tracing
 
   --help                   Display this help screen.
@@ -80,7 +75,7 @@ Copyright (C) 2021 maa.signing.tool
 C:\src\attestation\maa.signing.tool>dotnet run -- signpolicy -p .\policy\deny.all.txt -k \maa\mycert.key -x 12345 -s \maa\mycert.crt -j .\my.signed.policy.txt
 
 Policy JWT:
-eyAiYWxnIjoiUlMyNTYiLCAieDVjIjogWyJNSUlEUlRDQ0FpMmdBd0lCQWdJVURWMW43aUc2MDF3ckdLMXA2dU0yQWtBaWNoc3dEUVlKS29aSWh2Y05BUUVMQlFBd01URUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdNQ2xkaGMyaHBibWQwYjI0eERUQUxCZ05WQkFvTUJGTmxiR1l3SUJjTk1qRXhNVEUwTVRVd056QTNXaGdQTWpFeU1URXdNakV4TlRBM01EZGFNREV4Q3pBSkJnTlZCQVlUQWxWVE1STXdFUVlEVlFRSURBcFhZWE5vYVc1bmRHOXVNUTB3Q3dZRFZRUUtEQVJUWld4bU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBN2pRWlVRemV5ZEI4dExmTXpnRzZNdUxsclFpTllUNWdjaGJDZVAwNlF1RzZNWEtoMW9EVFAvMkhDVXdXYnovaURDNVROSkVaTVFiUEJDRHNYcktiTFhpNEJRenJzODZuZkZTNCtyZFpGT3BldUtWSmhmSmJKbkJDNW5MekVWc2w2SFFHY08yRGMzbTVhL3VyaURSOTFHZ1JpR1pjditlVHhab0dmUzBXNFJRYytlV0UzVE9YWTVoNFlEWVBnK2JFdFcvMGlJWUxOYmZrdjV6bHMyVEFFTGdFelVGU0ZGLzVOOEk4QllETzFGVFlKZmVEdk90V2hjNzdMZXN4R3d3TGdmRWgrM2FpZkdJMXMrKzdmZHpNRk9Ob3lWZ3hVRWRTUTZyTTM2cEhHWVJpS3hSNnc4eDBDMW1MTHBPUTFJNjV2clhCMmZ1cTFjRkYybml3MFVXd2VRSURBUUFCbzFNd1VUQWRCZ05WSFE0RUZnUVU4WWN0QnY2RXByeXEyWEZRYXE2WDMwQ3NlNWd3SHdZRFZSMGpCQmd3Rm9BVThZY3RCdjZFcHJ5cTJYRlFhcTZYMzBDc2U1Z3dEd1lEVlIwVEFRSC9CQVV3QXdFQi96QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFJVGdBZm5RVVpiVlJpOTliUTZNU0pSaUl1RTMvQms5M29EWVlONGE5eERHdm9Zb3ZTZE42bUhpZTNWd1pYUzFublhxc1BGMmpZdEJBNXlpU0tuRU1jNWkyb0xNVEw5N0UwMC9LUmhPN2hZU0F4SWFheVI5bUkwMkdIb2tTYW5kNDZJbVJLT0JSYWJtSjBLNXFhS1hvR0xlMGlkakVtdk1KU0Rlb3ZDdG0yRi90R2c5ME5oZUxuRlZQclhTTlYyTDJqbytnZ0x3SDNnQ0JWWW9jN2trbWNzYktTY3EwczlITlNuOGtDMS9aV0JpUUZIL3hXTWwxVUtLWUNFazlkakpJVE16ZkNxR2NaRnM2YzVqNGhyNEpmdDdIN2l0RDVWSDBWcURnSGlHV2xaakdvUFZCdkR1RWZLVXZpWnVKKzBCWnBKSjhzMWxTVXhLc0xlUldxamZZQmc9PSJdfQ.eyJBdHRlc3RhdGlvblBvbGljeSI6InZlcnNpb249MS4wO1xyXG5cclxuYXV0aG9yaXphdGlvbnJ1bGVzXHJcbntcclxuPT5kZW55KCk7XHJcbn07XHJcblxyXG5pc3N1YW5jZXJ1bGVzXHJcbntcclxufTsifQ.WTua1_Zb5EnYN7YLCueY1uu5U7LV5QeSbojHjXU6BWSQU85FaKqopXtpV3xv4AAsOQvc06B4vXx1dAnNW4bYRPgWuCfOO7sOOfkuxqqRJvzEmCBHiJVFa-CryWvTkH2SRyEqw8Hgs75nrG1rq2im0CEcqPIWyYxPohPUWje82ZA9HE0ncxpv2SZY8tTx_Mt4ox03ondkjjXrRvRJ1Z-AhmeqVH4qhaevAPzPmB5N8SdjYpvwcvcj1_2WJ-vqDeo84lGccy0VeH_ubluPtWZV9shlPKYpR6cnhzEI4WDzUNMnY2lUT6U4-xEP3T3uPw3U2oZnOGMgrsq6-GJY-vdjsA
+eyAiYWxnIjoiUlMyNTYiLCAieDVjIjogWyJNSUlETFRDQ0FoV2dBd0lCQWdJVU9zMFd0enVza1EraHltVm4rOWhkQUdtSktaQXdEUVlKS29aSWh2Y05BUUVMQlFBd1BqRUxNQWtHQTFVRUJoTUNWVk14Q3pBSkJnTlZCQWdNQWxkQk1SQXdEZ1lEVlFRSERBZFNaV1J0YjI1a01SQXdEZ1lEVlFRS0RBZERiMjUwYjNOdk1DQVhEVEkyTVRFd016QTBOVFkxTkZvWUR6SXhNall4TURFd01EUTFOalUwV2pBK01Rc3dDUVlEVlFRR0V3SlZVekVMTUFrR0ExVUVDQXdDVjBFeEVEQU9CZ05WQkFjTUIxSmxaRzF2Ym1ReEVEQU9CZ05WQkFvTUIwTnZiblJ2YzI4d2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUURlOWNDZk9FR0NqOXNaVklSc2NOa0RKZVQ2OERhWi9uQzZvUlZVcXVnRUJIOFA3RHdab3RRbU5XT29hWjJNdWNxZlROTHZkOXlBRkNqTG1DK1RHNkVGWjAzWklib2t4aFZ1NmVaemVydzhWQmRPS25YMndTb3RaeVMrREpVU2FkN1oxT01GdmhVN1ZqRFMzU3VQWGNLR0pPRGZlSzFRazVlbUhOR0hKdUtqYVBSRXEzMmk1ODErN0toY2R0QzkyYzhGSk4vVkRvenNXdUNuVmF4VG4xWDZsSEZkZGtJNU5QVUJONVFCbk5jUnl2bmx6MG12TU9NRUg1K29XbEd5Yk1aN08vd21NaDR5QVBXYys1VHVrMzlpNkYyNW1xbEdkRHFhYURSTGtEcnAvQ003RW55dy9pSWY5aERTQy9KeUpKbkFGbyt1YWFQK0xUSDFvYUpHdDFqakFnTUJBQUdqSVRBZk1CMEdBMVVkRGdRV0JCUzJFL0pPdXE0cWZWOHZoQlJMTnFKaEFaU3NBVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBU0ttN3hNV01sTm1HOE90SHFtUU5tRWJxMjhnVHMxVkVGLzJSbTJ2V2pJdi9KRlhZYlc2WHFzVTRRUVhMTFZ0bHdNY2dacFhJdW9qRDIvNERqNzZMdEVVRnk2QzU3SThIaU5QUXNXRDZEelNmQWZaMFViNE1yeUpVaXdoTlVSMHVYczVaODZ0bzg4ZnBEaSs2M2lSS29GL2NzSm1OSG45cEI4a1RvSkhCaEtORlNveWhLZFZ6cGkxWk9TZEZmQ25oVlhpa2RhV05wa0UwM2I0WS9JSnJYcjQxZVJMTWNDN3I4dXIzTXJxOFBxUzBJV1hWMlZtTTFzY0QxaUZZK244ZEt2eUxqMFYwMFNNRzlzRHk5d3IzUE1MeWo5dFJxUGVsa0djUUl4RWJ0TjUyYWVGMmkzSUVKOFdKUDlmTWpubG1TbzNwaEhreG9icHd3TSsvT3ZkZ3h3PT0iXX0.eyJBdHRlc3RhdGlvblBvbGljeSI6ImRtVnljMmx2YmoweExqQTdEUW9OQ21GMWRHaHZjbWw2WVhScGIyNXlkV3hsY3cwS2V3MEtQVDVrWlc1NUtDazdEUXA5T3cwS0RRcHBjM04xWVc1alpYSjFiR1Z6RFFwN0RRcDlPdyJ9.gSYu20C6G3VZ8DxL2bY0Ip23Tk1irdazq30NXbGsBX1AB1lmS6XYH4YugT0iTqQ0JMAf4oFkWLXvnQIWKysBANdmavWTw9lSL2nsSu_-oJxKBLUmwGnusyID-V45hw1h2N63QamqpZYakbdcUvalKk7QW8-v27j-GZct5UwHURpen-OkZeP6CkEW7xB5JmEGbfzqaLUBgecomhXaqKHyeE8CQXdSkLK_JqvBhCcB7g3x4ivehfzAxtFjQ0Ak4tqzO0BwruzZhewPu5LY7iu64NmswlylbauDe1PpcwAXE8yuWpLJ129hhoLNz0kg7BpV6ZezmquRMmIIi-O1K5kIWw
 ```
 
 ## Update MAA using signed policy JWT
@@ -117,11 +112,9 @@ To create a signed certificate JWT, run the maa.signing.tool using the `signcert
 ```
 C:\src\attestation\maa.signing.tool>dotnet run -- help signcert
 maa.signing.tool 1.0.0
-Copyright (C) 2023 maa.signing.tool
+Copyright (C) 2026 maa.signing.tool
 
   -c, --certfile           Required. Path to certificate file to be signed into a MAA certificate JWT
-
-  -w, --preview            Generate files consistent with MAA 2018-09-01-preview api-version
 
   -k, --keyfile            Required. Path to PEM formatted file that contains your 2048 bit RSA private key
 
@@ -130,6 +123,8 @@ Copyright (C) 2023 maa.signing.tool
   -s, --signingcertfile    Required. Path to PEM formatted file that contains your signing certificate
 
   -j, --jwtfile            Path to store generated JWT
+
+  -w, --preview            Generate files consistent with MAA 2018-09-01-preview api-version
 
   -v, --verbose            Enable verbose tracing
 
@@ -159,7 +154,7 @@ eyAiYWxnIjoiUlMyNTYiLCAieDVjIjogWyJNSUlEYVRDQ0FsR2dBd0lCQWdJVUpVTFZUSHk3RERpZ3Zz
 To upload the signed certificate JWT, you can use the PowerShell `Add-AzAttestationPolicySigner` cmdlet.  Note that after the operation completes, there are now 2 trusted signing certificates.
 
 ```PowerShell
-PS C:\src\attestation\maa.signing.tool> Add-AzAttestationPolicySigner -ResourceGroupName gnkdemo -Name isolatedtest001 -Signer (Get-Content -Path .\my.signed.cert.txt -Raw)
+PS C:\src\attestation\maa.signing.tool> Add-AzAttestationPolicySigner -ResourceGroupName gnkdemo -Name isolatedtest001 -Signer (Get-Content -Path .\my.signed.cert.ga.txt -Raw)
 
 
 CertificateCount : 2

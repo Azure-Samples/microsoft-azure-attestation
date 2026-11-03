@@ -10,7 +10,7 @@ description: "Learn how to perform Intel® SGX Attestation using Microsoft Azure
 
 # Sample code for Intel® SGX Attestation using Microsoft Azure Attestation
 
-Intel® SGX Attestation sample code demonstrates how to generate a quote from an SGX enclave using Open Enclave SDK / Intel SDK and then get it validated by Microsoft Azure Attestation. The "enclave held data" for the quote is populated with public key component that's held within the enclave.
+Intel® SGX Attestation sample code demonstrates how to generate a quote from an SGX enclave using Open Enclave SDK / Intel SDK and then get it validated by Microsoft Azure Attestation. The "enclave held data" for the quote is the public key of an RSA key pair generated inside the enclave in the Open Enclave SDK sample, and a fixed sample byte array in the Intel SDK sample.
 
 The components used in the sample code are outlined in the following diagram:
 ![SGX Attestation Overview Diagram](./media/maa.sample.diagram.png)
@@ -25,6 +25,10 @@ The flow is:
 See code sample to perform SGX attestation using [Open Enclave SDK](./sgx.attest.sample.oe.sdk)
 
 See code sample to perform SGX attestation using [Intel SDK](./sgx.attest.sample.intel.sdk)
+
+# Sample code to validate an Azure Attestation token
+
+See a .NET code sample that validates an Azure Attestation token, including the SEV-SNP evidence embedded in the token signing certificate, [here](./maa.jwt.verifier.dotnet)
 
 ## Retired MAA signer-validation samples
 

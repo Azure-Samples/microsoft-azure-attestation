@@ -22,7 +22,7 @@ The flow is:
     1. Calls into the Open Enclave SDK to parse the remote quote to retrieve important attributes like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Persists the remote quote, enclave held data and parsed report fields to a JSON file on disk
 1. ```genquote_enclave``` - This application is an SGX enclave created via the Open Enclave SDK.  It exposes one ecall to retrieve a remote quote and enclave held data.
-1. ```validatequotes.core``` - This application is built on .NET and runs on any platform.  It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
+1. ```validatequotes.core``` - This is a .NET 10 console application. It doesn't need SGX hardware and runs on the operating systems supported by .NET 10, such as Windows, Linux and macOS.  It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
     1. Calls the Azure Attestation for validation, passing it the remote quote and enclave held data found in the JSON file
     1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
     1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
@@ -87,7 +87,10 @@ The debug configuration (`enc.conf`, `Debug=1`) produces a debuggable enclave: a
 To set up the pre-requisites to build and run these samples:
 1. Create an Ubuntu 22.04 VM with Intel SGX from [Azure Confidential Compute](https://azure.microsoft.com/en-us/solutions/confidential-compute/).
 1. Install the [Open Enclave SDK](https://github.com/openenclave/openenclave/blob/master/docs/GettingStartedDocs/install_oe_sdk-Ubuntu_22.04.md) on this VM.  You don't need to install Ninja or CMake -- they are not used here.
-1. Add the command "```. /opt/openenclave/share/openenclave/openenclaverc```" to your ~/.bashrc file.
+1. Install the build tools used by the sample Makefiles: `sudo apt install -y build-essential pkg-config`
+1. Set up the Open Enclave environment in the current shell and in new shells:
+    1. `. /opt/openenclave/share/openenclave/openenclaverc`
+    1. `echo ". /opt/openenclave/share/openenclave/openenclaverc" >> ~/.bashrc`
 1. Install the [.NET 10.0 SDK](https://learn.microsoft.com/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204) on this VM. On Ubuntu 22.04, .NET 10 is available from the Ubuntu .NET backports package repository:
     1. `sudo add-apt-repository ppa:dotnet/backports`
     1. `sudo apt update && sudo apt install -y dotnet-sdk-10.0`

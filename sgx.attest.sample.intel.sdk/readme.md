@@ -15,16 +15,16 @@ The execution flow in the sample code are outlined in the following diagram:
 ![Microsoft Azure Attestation SGX Attestation Overview Diagram](./docs/sample.flow.png)
 
 The flow is:
-1. ```genquote_enclave``` - This application is an SGX enclave created via the Intel® SGX SDK. It exposes one ECALL to retrieve a remote quote for enclave held data.
+1. ```genquote_enclave``` - This application is an SGX enclave created via the Intel® SGX SDK. It exposes one ECALL that creates an SGX report for the enclave held data, targeted at the Intel quoting enclave.
     1. Generate signing key (`private.pem`)
     1. Build enclave (`genquote_enclave`)
     1. Sign enclave with the key
-1. ```genquote_host``` - This application is run first and performs the following:
+1. ```genquote_sgx_host``` - This application is run first and performs the following:
     1. Initializes and launches the `genquote_enclave` SGX enclave instance
-    1. Invokes the enclave protected method (ECALL) to retrieve a remote quote for hashed (SHA256) enclave held data, which in this case is a `uint8_t` static array
+    1. Invokes the enclave protected method (ECALL) to create an SGX report over the hashed (SHA256) enclave held data, which in this case is a `uint8_t` static array, and gets a remote quote for that report from the Intel quoting enclave (`sgx_qe_get_quote`)
     1. Retrieves important attributes from the SGX report, such as Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
     1. Persists the remote quote, enclave held data and parsed report fields to a JSON file on disk
-1. ```validatequotes.core``` - This application is built on .NET and runs on any platform. It consumes the JSON file persisted by the ```genquote_host``` application and performs the following:
+1. ```validatequotes.core``` - This is a .NET 10 console application. It doesn't need SGX hardware and runs on the operating systems supported by .NET 10, such as Windows, Linux and macOS. It consumes the JSON file persisted by the ```genquote_sgx_host``` application and performs the following:
     1. Calls the Azure Attestation service for validation, passing it the remote quote and enclave held data found in the JSON file
     1. Validates that the Azure Attestation JWT passes signature validation and is issued by the expected party
     1. Validates that the Azure Attestation JWT claim values match the parsed data in the JSON file for the well known fields like Security Version Number, ProductID, MRSIGNER, MRENCLAVE, etc.
@@ -32,15 +32,18 @@ The flow is:
 
 ### Quote Generation
 
-Remote quote generation is performed by the following call to the ```sgx_create_report``` method in the [ecalls.cpp](./genquotes/enclave/ecalls.cpp) file in the ```genquote_enclave``` application.
+Remote quote generation is a two-step process. First, the enclave creates an SGX report over the enclave held data, targeted at the Intel quoting enclave, by the following call to the ```sgx_create_report``` method in the [ecalls.cpp](./genquotes/enclave/ecalls.cpp#L11) file in the ```genquote_enclave``` application:
 
 ```
-sgx_status_t sgx_create_report(
-    const sgx_target_info_t *target_info,
-    const sgx_report_data_t *report_data,
-    sgx_report_t *report
-);
+return sgx_create_report(p_qe3_target, p_data, p_report);
+```
 
+Then the host gets the remote quote for that report from the Intel quoting enclave by the following call to the ```sgx_qe_get_quote``` method in the [host.cpp](./genquotes/host/host.cpp#L131) file in the ```genquote_sgx_host``` application:
+
+```
+qe3_ret = sgx_qe_get_quote(&app_report,
+                           quote_size,
+                           p_quote_buffer);
 ```
 
 ### Remote Quote Validation via MAA Attestation
@@ -94,7 +97,7 @@ If the SDK is installed into /opt/intel, run the following command:
 ```
 echo "source /opt/intel/sgxsdk/environment" >> ~/.bashrc && source ~/.bashrc
 ```
-For more information see: https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions/sdk.html
+For more information see: https://github.com/intel/linux-sgx
 
 Install SGX libraries:
 ```

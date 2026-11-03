@@ -61,7 +61,7 @@ namespace maa.signing.tool
 
             // Get certificate
             ValidateFileExists(options.CertFileName, "Certificate file is not accessable");
-            var cert = new X509Certificate2(options.CertFileName);
+            var cert = X509CertificateLoader.LoadCertificateFromFile(options.CertFileName);
 
             // Sign certificate
             var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert, options.UseMaaPreviewApiVersion);
@@ -135,7 +135,7 @@ namespace maa.signing.tool
             }
 
             // Import signing certificate
-            var signingCert = new X509Certificate2(options.SigningCertFileName);
+            var signingCert = X509CertificateLoader.LoadCertificateFromFile(options.SigningCertFileName);
 
             return (signingKey, signingCert);
         }
