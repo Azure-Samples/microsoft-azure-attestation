@@ -73,7 +73,7 @@ See [code](Program.cs#L426).
 
 ### Prerequisites
 
-- [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
+- [.NET SDK 10.0+](https://dotnet.microsoft.com/download)
 - Internet access
 - Attestation instance URL (e.g., `https://instance.attest.azure.net`)
 
@@ -107,5 +107,5 @@ Open the folder in [VS Code](https://code.visualstudio.com/) and press `F5` to s
 
 ## References
 
-- [Microsoft Azure Attestation API](https://github.com/Azure/azure-rest-api-specs/tree/main/specification/attestation/data-plane/Microsoft.Attestation/stable/2022-08-01)
-- [Attestation Request Example](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/attestation/data-plane/Microsoft.Attestation/stable/2022-08-01/examples/AttestSevSnpVm.json)
+- [Microsoft Azure Attestation API](https://github.com/Azure/azure-rest-api-specs/tree/main/specification/attestation/data-plane/Attestation/stable/2022-08-01)
+- [Attestation Request Example](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/attestation/data-plane/Attestation/stable/2022-08-01/examples/AttestSevSnpVm.json)

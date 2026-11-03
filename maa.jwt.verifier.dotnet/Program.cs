@@ -197,7 +197,7 @@ namespace maa.jwt.verifier.sevsnp
                 }
 
                 var certificates = certMatches
-                    .Select(match => new X509Certificate2(Encoding.ASCII.GetBytes(match.Value)))
+                    .Select(match => X509Certificate2.CreateFromPem(match.Value))
                     .ToList();
 
                 var leafCert = certificates.FirstOrDefault();

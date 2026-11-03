@@ -54,7 +54,7 @@ namespace maa.jwt.verifier.sevsnp
                         if (!string.IsNullOrEmpty(certBase64))
                         {
                             var certBytes = Convert.FromBase64String(certBase64);
-                            var x509Certificate = new X509Certificate2(certBytes);
+                            var x509Certificate = X509CertificateLoader.LoadCertificate(certBytes);
 
                             // Add only self-signed certificates
                             if (x509Certificate.Subject == x509Certificate.Issuer)
