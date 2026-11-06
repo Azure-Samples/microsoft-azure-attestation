@@ -54,12 +54,19 @@ namespace maa.jwt.verifier.sevsnp
                 var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token)
                                ?? throw new Exception("JWT token is null.");
 
-                string certificatesString = await Utils.GetSigningCertificatesAsync(jwt);
-                var selfSignedCerts = Utils.RetrieveSelfSignedSigningCertificates(certificatesString);
+                string kid = jwt.Header.Kid;
+                if (string.IsNullOrEmpty(kid))
+                {
+                    throw new Exception("Missing 'kid' header in JWT.");
+                }
 
-                result &= await ValidateTokenAsync(jwt, certificatesString, expectedDnsName, validateLifetime);
+                string certificatesString = await Utils.GetSigningCertificatesAsync(jwt, expectedDnsName);
 
-                var selfSignedCert = selfSignedCerts[0];
+                // The same certificate must validate the token signature and carry the SEV-SNP evidence.
+                using var selfSignedCert = Utils.GetSelfSignedSigningCertificate(certificatesString, kid);
+
+                result &= await ValidateTokenAsync(jwt, selfSignedCert, kid, expectedDnsName, validateLifetime);
+
                 var quoteValueJson = Utils.GetExtensionValueAsJson(selfSignedCert, Constants.MAA_EVIDENCE_CERTIFICATE_EXTENSION_OID);
 
                 var vcekCertChainValue = Utils.GetExtensionValueDecodedString(quoteValueJson, "VcekCertChain");
@@ -84,22 +91,22 @@ namespace maa.jwt.verifier.sevsnp
 
         /// <summary>
         /// Validates the signature, issuer, and (optionally) the expiration of a JWT
-        /// using the issuer's signing keys retrieved from its JWK endpoint.
+        /// using only the signing certificate selected by the token's `kid`.
         /// </summary>
         /// <param name="jwt">Parsed JWT token.</param>
-        /// <param name="certificatesString">JWK set retrieved from the issuer's `jku` URL.</param>
+        /// <param name="signingCert">Self-signed signing certificate from the expected instance's JWK set.</param>
+        /// <param name="kid">The `kid` from the JWT header.</param>
         /// <param name="expectedIssuer">Expected `iss` claim value (e.g., MAA instance URL).</param>
         /// <param name="validateLifetime">Whether to validate token expiration.</param>
         /// <returns>True if the token is valid; otherwise, false.</returns>
-        private static async Task<bool> ValidateTokenAsync(JwtSecurityToken jwt, string certificatesString, string expectedIssuer, bool validateLifetime)
+        private static async Task<bool> ValidateTokenAsync(JwtSecurityToken jwt, X509Certificate2 signingCert, string kid, string expectedIssuer, bool validateLifetime)
         {
             try
             {
-                var issuerPublicKeySet = new JsonWebKeySet(certificatesString);
                 var parameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKeys = issuerPublicKeySet.GetSigningKeys(),
+                    IssuerSigningKey = new X509SecurityKey(signingCert, kid),
 
                     // This sample does not validate audience because it is not acting as a specific relying party.
                     ValidateAudience = false,

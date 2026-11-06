@@ -14,70 +14,80 @@ namespace maa.jwt.verifier.sevsnp
     public static class Utils
     {
         /// <summary>
-        /// Retrieves the JSON Web Key Set (JWKS) from the 'jku' (JWK Set URL) specified in the JWT header.
+        /// Retrieves the JSON Web Key Set (JWKS) of the expected MAA instance after checking that the
+        /// 'jku' (JWK Set URL) in the JWT header points to it.
         /// </summary>
         /// <param name="jwt">The parsed JwtSecurityToken.</param>
+        /// <param name="expectedIssuer">Expected MAA instance URL; its JWKS is served at {expectedIssuer}/certs.</param>
         /// <returns>The raw JWKS JSON string.</returns>
-        /// <exception cref="Exception">Throws if 'jku' header is missing, invalid, or if the endpoint cannot be retrieved.</exception>
-        public static async Task<string> GetSigningCertificatesAsync(JwtSecurityToken jwt)
+        /// <exception cref="Exception">Throws if 'jku' header is missing, doesn't match the expected instance, or if the endpoint cannot be retrieved.</exception>
+        public static async Task<string> GetSigningCertificatesAsync(JwtSecurityToken jwt, string expectedIssuer)
         {
             if (!jwt.Header.TryGetValue("jku", out object? jkuValue) || jkuValue is not string jkuUrl)
             {
                 throw new Exception("Missing or invalid 'jku' header in JWT.");
             }
 
-            Console.WriteLine($"\tJWT Signing Certificates Endpoint (jku): {jkuUrl}");
+            // The token supplies 'jku', so only trust it when it is the expected instance's key endpoint.
+            string expectedJku = expectedIssuer.TrimEnd('/') + "/certs";
+            if (!string.Equals(jkuUrl, expectedJku, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception($"The 'jku' header '{jkuUrl}' doesn't match the expected endpoint '{expectedJku}'.");
+            }
+
+            Console.WriteLine($"\tJWT Signing Certificates Endpoint (jku): {expectedJku}");
 
             using var httpClient = new HttpClient();
-            string jwkSetJson = await httpClient.GetStringAsync(jkuUrl)
-                ?? throw new Exception($"Failed to retrieve JWK set from the 'jku' endpoint: {jkuUrl}");
+            string jwkSetJson = await httpClient.GetStringAsync(expectedJku)
+                ?? throw new Exception($"Failed to retrieve JWK set from the 'jku' endpoint: {expectedJku}");
 
             return jwkSetJson;
         }
 
-        public static List<X509Certificate2> RetrieveSelfSignedSigningCertificates(string certificatesString)
+        /// <summary>
+        /// Returns the self-signed signing certificate whose 'kid' matches the JWT header.
+        /// </summary>
+        /// <param name="certificatesString">JWK set retrieved from the expected instance.</param>
+        /// <param name="kid">The 'kid' from the JWT header.</param>
+        /// <exception cref="Exception">Throws if no key has that 'kid', or its certificate is missing or not self-signed.</exception>
+        public static X509Certificate2 GetSelfSignedSigningCertificate(string certificatesString, string kid)
         {
             using var doc = JsonDocument.Parse(certificatesString);
-            var root = doc.RootElement;
 
-            List<X509Certificate2> certificates = new List<X509Certificate2>();
-            if (root.TryGetProperty("keys", out JsonElement keys) && keys.ValueKind == JsonValueKind.Array)
+            if (!doc.RootElement.TryGetProperty("keys", out JsonElement keys) || keys.ValueKind != JsonValueKind.Array)
             {
-                foreach (var certEntry in keys.EnumerateArray())
+                throw new Exception("The JWK set has no 'keys' array.");
+            }
+
+            foreach (var certEntry in keys.EnumerateArray())
+            {
+                if (!certEntry.TryGetProperty("kid", out var kidProp) ||
+                    kidProp.ValueKind != JsonValueKind.String ||
+                    kidProp.GetString() != kid)
                 {
-                    if (certEntry.TryGetProperty("x5c", out JsonElement x5cArray) &&
-                        x5cArray.ValueKind == JsonValueKind.Array &&
-                        x5cArray.GetArrayLength() > 0)
-                    {
-                        string certBase64 = x5cArray[0].GetString() ?? throw new Exception("Failed to get certificate string");
-
-                        if (!string.IsNullOrEmpty(certBase64))
-                        {
-                            var certBytes = Convert.FromBase64String(certBase64);
-                            var x509Certificate = X509CertificateLoader.LoadCertificate(certBytes);
-
-                            // Add only self-signed certificates
-                            if (x509Certificate.Subject == x509Certificate.Issuer)
-                            {
-                                certificates.Add(x509Certificate);
-
-                                // Optional logging or debug info:
-                                if (certEntry.TryGetProperty("kid", out var kidProp))
-                                {
-                                    Console.WriteLine($"\tKey ID for self-signed signing certificate: {kidProp.GetString()}");
-                                }
-                            }
-                        }
-                    }
+                    continue;
                 }
+
+                if (!certEntry.TryGetProperty("x5c", out JsonElement x5cArray) ||
+                    x5cArray.ValueKind != JsonValueKind.Array ||
+                    x5cArray.GetArrayLength() == 0 ||
+                    string.IsNullOrEmpty(x5cArray[0].GetString()))
+                {
+                    throw new Exception($"The signing key '{kid}' has no certificate.");
+                }
+
+                var x509Certificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(x5cArray[0].GetString()!));
+                if (x509Certificate.Subject != x509Certificate.Issuer)
+                {
+                    x509Certificate.Dispose();
+                    throw new Exception($"The signing certificate for key '{kid}' is not self-signed.");
+                }
+
+                Console.WriteLine($"\tKey ID for self-signed signing certificate: {kid}");
+                return x509Certificate;
             }
 
-            if (certificates.Count < 1)
-            {
-                throw new Exception($"Failed to find any self-signed certificates in {certificatesString}");
-            }
-
-            return certificates;
+            throw new Exception($"No signing key with kid '{kid}' found at the 'jku' endpoint.");
         }
 
         public static string RsaToPem(RSA? rsa)
