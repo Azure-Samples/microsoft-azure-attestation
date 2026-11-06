@@ -77,19 +77,25 @@ The verification that the MAA service JWT claims match the initial parsed report
 1. Create an [Azure Confidential Computing](https://azure.microsoft.com/en-us/solutions/confidential-compute/) Ubuntu 22.04 VM with Intel SGX.
 2. Install the Intel SGX SDK and SGX libraries. See https://download.01.org/intel-sgx/sgx-dcap (for example, https://download.01.org/intel-sgx/sgx-dcap/1.27.1/linux/distro/ubuntu22.04-server/) for the latest SDK files. Ubuntu 22.04 kernels include the SGX driver, so no separate driver installation is needed.
 
-Configure the Intel and Microsoft APT Repositories:
+Configure the Intel and Microsoft APT Repositories. Each key is trusted only for its own repository (`signed-by`):
 ```
-echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
-wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
-echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" | sudo tee /etc/apt/sources.list.d/msprod.list
-wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+sudo install -d -m 0755 /etc/apt/keyrings
+wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo gpg --dearmor -o /etc/apt/keyrings/intel-sgx.gpg
+echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/intel-sgx.gpg] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/ubuntu/22.04/prod jammy main' | sudo tee /etc/apt/sources.list.d/msprod.list
 ```
 
-Install Intel SGX SDK: 
+Install SGX libraries and the build tools (the SDK installer needs `make`):
+```
+sudo apt update
+sudo apt install -y build-essential libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
+```
+
+Install Intel SGX SDK. The installer runs only if its SHA-256 matches the value Intel publishes in [SHA256SUM_dcap_1.27.1.cfg](https://download.01.org/intel-sgx/sgx-dcap/1.27.1/linux/SHA256SUM_dcap_1.27.1.cfg):
 ```
 wget https://download.01.org/intel-sgx/sgx-dcap/1.27.1/linux/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.30.101.1.bin -O sgx_linux_x64_sdk.bin
-sudo chmod a+x sgx_linux_x64_sdk.bin
-sudo ./sgx_linux_x64_sdk.bin
+echo "9a2575ea9c2ae23382488d7bb3f1209155b5e4e4a93cb792a6b5a3f86f4a7e6c  sgx_linux_x64_sdk.bin" | sha256sum -c - && chmod a+x sgx_linux_x64_sdk.bin && sudo ./sgx_linux_x64_sdk.bin
 ```
 
 Specify a directory to install the Intel SGX SDK. For example, `/opt/intel`
@@ -98,12 +104,6 @@ If the SDK is installed into /opt/intel, run the following command:
 echo "source /opt/intel/sgxsdk/environment" >> ~/.bashrc && source ~/.bashrc
 ```
 For more information see: https://github.com/intel/linux-sgx
-
-Install SGX libraries:
-```
-sudo apt update
-sudo apt install -y build-essential libssl-dev libsgx-quote-ex libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client
-```
 
 3. Install the [.NET 10.0 SDK](https://learn.microsoft.com/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204) on this VM. On Ubuntu 22.04, .NET 10 is available from the Ubuntu .NET backports package repository:
 
