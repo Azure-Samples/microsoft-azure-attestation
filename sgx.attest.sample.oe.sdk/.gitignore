@@ -9,4 +9,8 @@
 genquote_host
 genquote_enclave
 
+# Enclave signing key pair, generated locally by genquotes/enclave/Makefile
+genquotes/enclave/private.pem
+genquotes/enclave/public.pem
+
 # Directories

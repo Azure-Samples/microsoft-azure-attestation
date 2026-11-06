@@ -7,25 +7,26 @@ namespace maa.signing.tool
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            new Program().Run(args);
+            return new Program().Run(args);
         }
 
-        public void Run(string[] args)
+        public int Run(string[] args)
         {
             try
             {
-                Parser.Default.ParseArguments<SignPolicyOptions, SignCertOptions, CreateSigningCertOptions>(args)
+                return Parser.Default.ParseArguments<SignPolicyOptions, SignCertOptions, CreateSigningCertOptions>(args)
                   .MapResult(
                     (SignPolicyOptions options) => { InitTracing(options); return SignPolicy(options); },
                     (SignCertOptions options) => { InitTracing(options); return SignCert(options); },
                     (CreateSigningCertOptions options) => { InitTracing(options); return CreateSigningCert(options); },
-                    errors => 1);
+                    errors => errors.All(e => e is HelpRequestedError || e is HelpVerbRequestedError || e is VersionRequestedError) ? 0 : 1);
             }
             catch (ValidationFailedException)
             {
-                // Ignore since error has already been reported
+                // Error has already been reported
+                return 1;
             }
         }
 
@@ -39,7 +40,16 @@ namespace maa.signing.tool
             Tracer.TraceVerbose($"Policy to be signed = \n{policy}\n");
 
             // Sign policy
-            var policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+            string policyJwt;
+            try
+            {
+                policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert);
+            }
+            catch (FormatException ex)
+            {
+                Tracer.TraceError(ex.Message);
+                throw new ValidationFailedException(ex.Message);
+            }
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(policyJwt)}\n");
 
             // Report JWT
@@ -61,10 +71,10 @@ namespace maa.signing.tool
 
             // Get certificate
             ValidateFileExists(options.CertFileName, "Certificate file is not accessable");
-            var cert = new X509Certificate2(options.CertFileName);
+            var cert = X509CertificateLoader.LoadCertificateFromFile(options.CertFileName);
 
             // Sign certificate
-            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert);
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(certJwt)}\n");
 
             // Report JWT
@@ -135,7 +145,7 @@ namespace maa.signing.tool
             }
 
             // Import signing certificate
-            var signingCert = new X509Certificate2(options.SigningCertFileName);
+            var signingCert = X509CertificateLoader.LoadCertificateFromFile(options.SigningCertFileName);
 
             return (signingKey, signingCert);
         }
