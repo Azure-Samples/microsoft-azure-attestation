@@ -7,37 +7,17 @@ namespace maa.signing.tool.utils
 {
     public class JwtUtils
     {
-        public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
+        public static string GenerateSignedPolicyJsonWebToken(string policy, RSA signingKey, X509Certificate2 signingCert)
         {
-            bool isJsonString = policy.TrimStart().StartsWith('"');
-
-            if (!useMaaPreviewApiVersion)
+            // MAA expects the Base64Url encoding of the UTF-8 policy text as a JSON string.
+            if (policy.TrimStart().StartsWith('"'))
             {
-                // GA api-versions expect the Base64Url encoding of the UTF-8 policy text as a JSON string.
-                if (isJsonString)
-                {
-                    policy = DecodeJsonString(policy);
-                }
-
-                string encodedPolicy = Base64Url.Encode(policy);
-                Tracer.TraceVerbose($"Base64url encoded policy = \n{encodedPolicy}\n");
-                return GenerateSingleClaimJsonWebToken("AttestationPolicy", JsonConvert.ToString(encodedPolicy), signingKey, signingCert);
+                policy = DecodeJsonString(policy);
             }
 
-            if (!isJsonString)
-            {
-                policy = policy.Replace("\n", @"\n");
-                policy = policy.Replace("\r", @"\r");
-                policy = policy.Replace("\"", "\\\"");
-                policy = "\"" + policy + "\"";
-                Tracer.TraceVerbose($"Updated policy to be signed = \n{policy}\n");
-            }
-            else
-            {
-                DecodeJsonString(policy);
-            }
-
-            return GenerateSingleClaimJsonWebToken("AttestationPolicy", policy, signingKey, signingCert);
+            string encodedPolicy = Base64Url.Encode(policy);
+            Tracer.TraceVerbose($"Base64url encoded policy = \n{encodedPolicy}\n");
+            return GenerateSingleClaimJsonWebToken("AttestationPolicy", JsonConvert.ToString(encodedPolicy), signingKey, signingCert);
         }
 
         private static string DecodeJsonString(string policy)
@@ -52,11 +32,11 @@ namespace maa.signing.tool.utils
             }
         }
 
-        public static string GenerateSignedCertificateJsonWebToken(X509Certificate2 embeddedCertificate, RSA signingKey, X509Certificate2 signingCert, bool useMaaPreviewApiVersion)
+        public static string GenerateSignedCertificateJsonWebToken(X509Certificate2 embeddedCertificate, RSA signingKey, X509Certificate2 signingCert)
         {
             var exportedCert = embeddedCertificate.Export(X509ContentType.Cert);
             string jwkToAdd = $"{{\"kty\":\"RSA\", \"x5c\":[\"{System.Convert.ToBase64String(exportedCert)}\"]}}";
-            return GenerateSingleClaimJsonWebToken(useMaaPreviewApiVersion ? "maa-policyCertificate" : "policyCertificate", jwkToAdd, signingKey, signingCert);
+            return GenerateSingleClaimJsonWebToken("policyCertificate", jwkToAdd, signingKey, signingCert);
         }
 
         public static string FormatJwt(string raw)

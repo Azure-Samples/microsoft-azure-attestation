@@ -43,7 +43,7 @@ namespace maa.signing.tool
             string policyJwt;
             try
             {
-                policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+                policyJwt = JwtUtils.GenerateSignedPolicyJsonWebToken(policy, signingKey, signingCert);
             }
             catch (FormatException ex)
             {
@@ -74,7 +74,7 @@ namespace maa.signing.tool
             var cert = X509CertificateLoader.LoadCertificateFromFile(options.CertFileName);
 
             // Sign certificate
-            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert, options.UseMaaPreviewApiVersion);
+            var certJwt = JwtUtils.GenerateSignedCertificateJsonWebToken(cert, signingKey, signingCert);
             Tracer.TraceVerbose($"Generated signed JWT = \n{JwtUtils.FormatJwt(certJwt)}\n");
 
             // Report JWT
